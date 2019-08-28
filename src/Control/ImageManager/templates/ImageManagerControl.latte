@@ -1,0 +1,38 @@
+<div class="container image-manager">
+	<div n:if="TRUE === $isSaveable" class="row">
+		<div class="col-12 mb-3">
+			<div class="thumbnail text-center thumbnail-dropzone">
+				<div class="img-thumbnail" n:inner-snippet="upload">
+					{if TRUE === $denyUpload}
+						<span class="dz-message">
+								{_'denied_upload_message'}
+						</span>
+					{else}
+						{control dropZone}
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row" n:inner-snippet="images">
+		<div n:foreach="$images as $image" class="col-12 col-sm-6 col-md-4 col-lg-3 text-center">
+			<div class="d-inline-block position-relative">
+				<div class="thumbnail mb-3">
+					<div n:if="count($actions)" class="image-manager-actions position-absolute text-right" style="right: 0; top: 0;">
+						<div class="dropdown">
+							<span class="dropdown-ellipses dropdown-toggle btn btn-secondary btn-sm bg-white" id="image-actions-{$uniqueId}-{$image->getId()}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<i class="fa fa-bars"></i>
+							</span>
+							<div class="dropdown-menu dropdown-menu-right" x-placement="bottom-end" aria-labelledby="image-actions-{$uniqueId}-{$image->getId()}">
+								<a n:foreach="$actions as $action" n:href="doAction!, actionName => $action->getName(), id => (string) $image->getId()" class="dropdown-item ajax">{_$action->getLabel()}</a>
+							</div>
+						</div>
+					</div>
+
+					<img class="img-fluid img-thumbnail" n:srcset="$image->getSource(), $thumbnailPreset" alt="">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

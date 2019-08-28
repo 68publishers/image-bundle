@@ -24,6 +24,7 @@ final class Configuration
 		'max_file_size' => NULL,
 		'save_manipulator_options' => NULL,
 		'event_subscribers' => [],
+		'thumbnail_preset' => NULL,
 		'dropzone' => [
 			'id' => NULL,
 			'template' => NULL,

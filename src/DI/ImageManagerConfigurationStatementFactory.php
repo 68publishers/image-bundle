@@ -97,6 +97,8 @@ final class ImageManagerConfigurationStatementFactory
 					->setAutowired(FALSE);
 			}
 		});
+		
+		$this->validateIfKeyExists($options, 'thumbnail_preset', 'null|string');
 
 		$this->validateIfKeyExists($options, 'dropzone.id', 'null|string');
 

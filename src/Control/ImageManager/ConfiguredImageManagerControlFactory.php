@@ -94,7 +94,15 @@ final class ConfiguredImageManagerControlFactory
 			$control->setSaveManipulatorOptions($config->get('save_manipulator_options'));
 		}
 
+		if (is_string($config->get('thumbnail_preset'))) {
+			$control->setThumbnailPreset($config->get('thumbnail_preset'));
+		}
+
 		$dispatcher = $control->getEventDispatcher();
+
+		foreach ($config->get('event_subscribers') as $eventSubscriber) {
+			$dispatcher->addSubscriber($eventSubscriber);
+		}
 
 		$dispatcher->addListener(SixtyEightPublishers\ImageBundle\Event\DropZoneControlSetupEvent::NAME, function (SixtyEightPublishers\ImageBundle\Event\DropZoneControlSetupEvent $event) use ($config) {
 			$control = $event->getDropZoneControl();
@@ -124,10 +132,6 @@ final class ConfiguredImageManagerControlFactory
 				$control->addExtension((string) $key, $value);
 			}
 		});
-
-		foreach ($config->get('event_subscribers') as $eventSubscriber) {
-			$dispatcher->addSubscriber($eventSubscriber);
-		}
 
 		return $control;
 	}

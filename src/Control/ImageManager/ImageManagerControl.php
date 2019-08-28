@@ -51,6 +51,9 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions|NULL */
 	private $saveManipulatorOptions;
 
+	/** @var string|NULL */
+	private $thumbnailPreset;
+
 	/**
 	 * @param \SixtyEightPublishers\ImageBundle\Storage\IDataStorage                     $dataStorage
 	 * @param \SixtyEightPublishers\ImageBundle\Control\DropZone\IDropZoneControlFactory $dropZoneControlFactory
@@ -167,6 +170,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		$this->template->actions = $this->actions;
 		$this->template->allowUpload = $allowUpload = (TRUE === $this->deleteExistingImageIfMaxAllowedReached[0] || (NULL === $maxFiles || $maxFiles > 0));
 		$this->template->denyUpload = !$allowUpload;
+		$this->template->thumbnailPreset = $this->thumbnailPreset;
 
 		$this->doRender();
 	}
@@ -220,6 +224,18 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	public function setMaxFileSize($maxFileSize): self
 	{
 		$this->maxFileSize = SixtyEightPublishers\ImageBundle\Helper\MaxFileSize::parseBytes($maxFileSize);
+
+		return $this;
+	}
+
+	/**
+	 * @param string $thumbnailPreset
+	 *
+	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl
+	 */
+	public function setThumbnailPreset(string $thumbnailPreset): self
+	{
+		$this->thumbnailPreset = $thumbnailPreset;
 
 		return $this;
 	}

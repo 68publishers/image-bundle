@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace SixtyEightPublishers\ImageBundle\DI;
 
+use Kdyby;
 use Nette;
 use Symfony;
-use Doctrine;
 use SixtyEightPublishers;
 
-final class ImageBundleExtension extends Nette\DI\CompilerExtension
+final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
+	Kdyby\Doctrine\DI\IEntityProvider,
+	Kdyby\Doctrine\DI\ITargetEntityProvider
 {
 	/** @var array  */
 	private $defaults = [
@@ -65,22 +67,6 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension
 				'name' => (string) $name,
 				'configuration' => $configurationStatementFactory->create((string) $name, $options),
 			]);
-		}
-	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * @throws \Nette\Utils\AssertionException
-	 */
-	public function beforeCompile(): void
-	{
-		[ $entity, $mapping ] = array_values($this->getImageEntityDefinition());
-
-		$this->resolveTargetEntity(SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage::class, $entity, $mapping);
-
-		if (is_subclass_of($entity, SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class, TRUE)) {
-			$this->resolveTargetEntity(SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class, $entity, $mapping);
 		}
 	}
 
@@ -205,22 +191,51 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension
 		return $this->imageEntityDefinition = $imageEntity;
 	}
 
-	/**
-	 * @param string $originalClassName
-	 * @param string $newClassName
-	 * @param array  $mapping
-	 *
-	 * @return void
-	 */
-	private function resolveTargetEntity(string $originalClassName, string $newClassName, array $mapping): void
-	{
-		$builder = $this->getContainerBuilder();
-		$listener = $builder->getDefinitionByType(Doctrine\ORM\Tools\ResolveTargetEntityListener::class);
+	/**************** interface \Kdyby\Doctrine\DI\IEntityProvider ****************/
 
-		$listener->addSetup('addResolveTargetEntity', [
-			ltrim($originalClassName, '\\'),
-			ltrim($newClassName, '\\'),
-			$mapping,
-		]);
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @throws \Nette\Utils\AssertionException
+	 */
+	public function getEntityMappings(): array
+	{
+		$entity = $this->getImageEntityDefinition()['entity'];
+
+		switch ($entity) {
+			case SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image::class:
+				return [
+					'SixtyEightPublishers\ImageBundle\DoctrineEntity' => __DIR__ . '/../DoctrineEntity/Basic',
+				];
+			case SixtyEightPublishers\ImageBundle\DoctrineEntity\SoftDeletable\Image::class:
+				return [
+					'SixtyEightPublishers\ImageBundle\DoctrineEntity' => __DIR__ . '/../DoctrineEntity/SoftDeletable',
+				];
+		}
+
+		return [];
+	}
+
+	/**************** interface \Kdyby\Doctrine\DI\ITargetEntityProvider ****************/
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @throws \Nette\Utils\AssertionException
+	 */
+	public function getTargetEntityMappings(): array
+	{
+		[ $entity, $mapping ] = array_values($this->getImageEntityDefinition());
+		$mapping['targetEntity'] = $entity;
+
+		$targetEntities = [
+			SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage::class => $mapping,
+		];
+
+		if (is_subclass_of($entity, SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class, TRUE)) {
+			$targetEntities[SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class] = $mapping;
+		}
+
+		return $targetEntities;
 	}
 }

@@ -13,7 +13,7 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension
 {
 	/** @var array  */
 	private $defaults = [
-		'image_entity' => SixtyEightPublishers\ImageBundle\DoctrineEntity\Image::class, # or array [entity => class name, mapping: array]
+		'image_entity' => SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image::class, # or array [entity => class name, mapping: array]
 		'image_entity_factory' => NULL,
 		'data_storage_factory' => SixtyEightPublishers\ImageBundle\Storage\DataStorageFactory::class,
 		'image_managers' => [],
@@ -129,11 +129,11 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension
 
 		if (NULL === $imageEntityFactory) {
 			switch ($imageEntity) {
-				case SixtyEightPublishers\ImageBundle\DoctrineEntity\Image::class:
+				case SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image::class:
 					$imageEntityFactory = SixtyEightPublishers\ImageBundle\EntityFactory\DefaultImageEntityFactory::class;
 
 					break;
-				case SixtyEightPublishers\ImageBundle\DoctrineEntity\SoftDeletableImage::class:
+				case SixtyEightPublishers\ImageBundle\DoctrineEntity\SoftDeletable\Image::class:
 					$imageEntityFactory = SixtyEightPublishers\ImageBundle\EntityFactory\SoftDeletableImageEntityFactory::class;
 
 					break;

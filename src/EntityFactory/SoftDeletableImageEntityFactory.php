@@ -15,6 +15,6 @@ final class SoftDeletableImageEntityFactory implements IImageEntityFactory
 	 */
 	public function create(SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfo $imageInfo): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{
-		return new SixtyEightPublishers\ImageBundle\DoctrineEntity\SoftDeletableImage($imageInfo);
+		return new SixtyEightPublishers\ImageBundle\DoctrineEntity\SoftDeletable\Image($imageInfo);
 	}
 }

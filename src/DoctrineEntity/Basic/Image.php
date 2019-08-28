@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SixtyEightPublishers\ImageBundle\DoctrineEntity;
+namespace SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic;
 
 use Nette;
 use Ramsey;
@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  */
-class Image implements IImage
+class Image implements SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 {
 	/**
 	 * @ORM\Id

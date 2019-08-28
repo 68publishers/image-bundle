@@ -45,7 +45,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	/** @var array  */
 	private $deleteExistingImageIfMaxAllowedReached = [ FALSE, self::DIRECTION_TOP ];
 
-	/** @var \Doctrine\Common\Collections\Collection|\SixtyEightPublishers\ImageBundle\DoctrineEntity\Image[]|NULL */
+	/** @var \Doctrine\Common\Collections\Collection|\SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage[]|NULL */
 	private $images;
 
 	/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions|NULL */
@@ -378,7 +378,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	}
 
 	/**
-	 * @return \Doctrine\Common\Collections\Collection|\SixtyEightPublishers\ImageBundle\DoctrineEntity\Image[]
+	 * @return \Doctrine\Common\Collections\Collection|\SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage[]
 	 */
 	private function getImages(): Doctrine\Common\Collections\Collection
 	{

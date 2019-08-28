@@ -15,6 +15,6 @@ final class DefaultImageEntityFactory implements IImageEntityFactory
 	 */
 	public function create(SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfo $imageInfo): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{
-		return new SixtyEightPublishers\ImageBundle\DoctrineEntity\Image($imageInfo);
+		return new SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image($imageInfo);
 	}
 }

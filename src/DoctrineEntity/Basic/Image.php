@@ -11,6 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
+ * @ORM\Table(indexes={
+ *     @ORM\Index(name="IDX_IMAGE_CREATED", columns={"created"})
+ * })
  * @ORM\HasLifecycleCallbacks
  */
 class Image implements SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage

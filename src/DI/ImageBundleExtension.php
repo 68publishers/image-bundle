@@ -49,6 +49,9 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 		$this->registerImageEntityFactory($builder, $config);
 		$this->registerDataStorageFactory($builder, $config);
 
+		$builder->addDefinition($this->prefix('event_subscriber.delete_image_source'))
+			->setType(SixtyEightPublishers\ImageBundle\EventSubscriber\DeleteImageSourceEventSubscriber::class);
+
 		$builder->addDefinition($this->prefix('control.image_manager_control_factory'))
 			->setImplement(SixtyEightPublishers\ImageBundle\Control\ImageManager\IImageManagerControlFactory::class)
 			->setArguments([

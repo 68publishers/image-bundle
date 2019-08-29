@@ -13,21 +13,14 @@ class DeleteManipulator implements IDeleteManipulator
 	use Nette\SmartObject;
 	use TExtendableTransaction;
 
-	/** @var \SixtyEightPublishers\ImageStorage\IImageStorageProvider  */
-	private $imageStorageProvider;
-
 	/** @var \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory  */
 	private $transactionFactory;
 
 	/**
-	 * @param \SixtyEightPublishers\ImageStorage\IImageStorageProvider                  $imageStorageProvider
 	 * @param \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory
 	 */
-	public function __construct(
-		SixtyEightPublishers\ImageStorage\IImageStorageProvider $imageStorageProvider,
-		SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory
-	) {
-		$this->imageStorageProvider = $imageStorageProvider;
+	public function __construct(SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory)
+	{
 		$this->transactionFactory = $transactionFactory;
 	}
 
@@ -55,17 +48,6 @@ class DeleteManipulator implements IDeleteManipulator
 			$em->remove($image);
 
 			return $image->getSource();
-		});
-
-		$transaction->finally(function (SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfo $source) {
-			try {
-				$this->imageStorageProvider->get($source->getStorageName())->delete($source);
-			} catch (\Throwable $e) {
-				throw new SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException(sprintf(
-					'Image entity was removed but resource not. Path: %s',
-					(string) $source
-				), 0, $e);
-			}
 		});
 
 		return $transaction;

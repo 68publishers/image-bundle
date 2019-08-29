@@ -182,7 +182,7 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 		}
 		
 		return $this->notifier = $this->notifierFactory->create(
-			$this->prefix ?? (str_replace('\\', '_', SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl::class) . 'message')
+			$this->prefix ?? (str_replace('\\', '_', SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl::class) . '.message')
 		);
 	}
 

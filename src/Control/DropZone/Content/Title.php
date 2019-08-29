@@ -17,7 +17,11 @@ final class Title implements ITranslatableHtmlString
 	/** @var bool  */
 	private $translate;
 
-	public function __construct(string $title = 'dropzone.default_title', bool $translate = TRUE)
+	/**
+	 * @param string $title
+	 * @param bool   $translate
+	 */
+	public function __construct(string $title = 'default_title', bool $translate = TRUE)
 	{
 		$this->title = $title;
 		$this->translate = $translate;

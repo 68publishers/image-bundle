@@ -11,7 +11,8 @@ use SixtyEightPublishers;
 
 final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 	Kdyby\Doctrine\DI\IEntityProvider,
-	Kdyby\Doctrine\DI\ITargetEntityProvider
+	Kdyby\Doctrine\DI\ITargetEntityProvider,
+	Kdyby\Translation\DI\ITranslationProvider
 {
 	/** @var array  */
 	private $defaults = [
@@ -237,5 +238,17 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 		}
 
 		return $targetEntities;
+	}
+
+	/******************* interface \Kdyby\Translation\DI\ITranslationProvider *******************/
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getTranslationResources(): array
+	{
+		return [
+			__DIR__ . '/../locale',
+		];
 	}
 }

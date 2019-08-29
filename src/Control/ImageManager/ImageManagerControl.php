@@ -168,7 +168,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		$this->template->uniqueId = $this->getUniqueId();
 		$this->template->isSaveable = $this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator::class);
 		$this->template->actions = $this->actions;
-		$this->template->allowUpload = $allowUpload = (TRUE === $this->deleteExistingImageIfMaxAllowedReached[0] || (NULL === $maxFiles || $maxFiles > 0));
+		$this->template->allowUpload = $allowUpload = (NULL === $maxFiles || $maxFiles > 0);
 		$this->template->denyUpload = !$allowUpload;
 		$this->template->thumbnailPreset = $this->thumbnailPreset;
 
@@ -408,6 +408,10 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	{
 		if (NULL === $this->maxAllowedImages) {
 			return NULL;
+		}
+
+		if (TRUE === $this->deleteExistingImageIfMaxAllowedReached[0]) {
+			return $this->maxAllowedImages;
 		}
 
 		$max = $this->maxAllowedImages - $this->getImages()->count();

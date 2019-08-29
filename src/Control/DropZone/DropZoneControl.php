@@ -58,15 +58,16 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 	/**
 	 * @internal
 	 *
-	 * @throws \Nette\Utils\JsonException
 	 * @return void
+	 * @throws \Nette\Application\UI\InvalidLinkException
+	 * @throws \Nette\Utils\JsonException
 	 */
 	public function render(): void
 	{
 		$this->template->setTranslator($this->getPrefixedTranslator());
 
 		$this->template->settings = Nette\Utils\Json::encode($this->settings);
-		$this->template->extensions = Nette\Utils\Json::encode($this->extensions);
+		$this->template->extensions = Nette\Utils\Json::encode(array_merge($this->getDefaultExtensions(), $this->extensions));
 		$this->template->contentHtml = $this->contentHtml;
 
 		$this->doRender();
@@ -267,5 +268,19 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 		}
 
 		return FALSE;
+	}
+
+	/**
+	 * @return array
+	 * @throws \Nette\Application\UI\InvalidLinkException
+	 */
+	private function getDefaultExtensions(): array
+	{
+		return [
+			'completed_signal' => [
+				'count_parameter' => $this->getUniqueId() . '-filesCount',
+				'url' => $this->link('completed!'),
+			],
+		];
 	}
 }

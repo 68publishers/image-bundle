@@ -52,7 +52,10 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 	 */
 	public function handleCompleted(?int $filesCount = NULL): void
 	{
-		$this->eventDispatcher->dispatch(new SixtyEightPublishers\ImageBundle\Event\UploadCompletedEvent($filesCount));
+		$this->eventDispatcher->dispatch(
+			new SixtyEightPublishers\ImageBundle\Event\UploadCompletedEvent($filesCount),
+			SixtyEightPublishers\ImageBundle\Event\UploadCompletedEvent::NAME
+		);
 	}
 
 	/**

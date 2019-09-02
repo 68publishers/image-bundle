@@ -126,9 +126,7 @@
                 extensions   = el.data('dropzone-extensions') || {},
                 id          = el.attr('id');
 
-            let dropzone = new Dropzone('#' + id, $.extend({
-                url: el.attr('action')
-            }, settings));
+            let dropzone = new Dropzone('#' + id, settings);
 
             /**
              * Fix? @link https://github.com/enyo/dropzone/issues/690

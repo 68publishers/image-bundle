@@ -15,6 +15,9 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 	/** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\Symfony\Component\EventDispatcher\EventDispatcher  */
 	private $eventDispatcher;
 
+	/** @var \Nette\Http\IRequest  */
+	private $request;
+
 	/** @var array  */
 	private $settings = [];
 
@@ -35,12 +38,46 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 
 	/**
 	 * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+	 * @param \Nette\Http\IRequest                                        $request
 	 */
-	public function __construct(Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher)
-	{
+	public function __construct(
+		Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher,
+		Nette\Http\IRequest $request
+	) {
 		parent::__construct();
 
 		$this->eventDispatcher = $eventDispatcher;
+		$this->request = $request;
+	}
+
+	/**
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function handleUpload(): void
+	{
+		try {
+			$file = $this->request->getFile('file');
+
+			if (!$file instanceof Nette\Http\FileUpload || !$file->isOk()) {
+				throw SixtyEightPublishers\ImageBundle\Exception\UploadException::invalidFileUpload();
+			}
+
+			if (!$this->isUploadAcceptable($file)) {
+				throw SixtyEightPublishers\ImageBundle\Exception\UploadException::unsupportedType($file->getContentType());
+			}
+
+			$this->eventDispatcher->dispatch(
+				new SixtyEightPublishers\ImageBundle\Event\FileUploadEvent($file),
+				SixtyEightPublishers\ImageBundle\Event\FileUploadEvent::NAME
+			);
+		} catch (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
+			$this->eventDispatcher->dispatch(
+				new SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent($e),
+				SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent::NAME
+			);
+		}
 	}
 
 	/**
@@ -69,9 +106,13 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 	{
 		$this->template->setTranslator($this->getPrefixedTranslator());
 
-		$this->template->settings = Nette\Utils\Json::encode($this->settings);
+		$this->template->settings = Nette\Utils\Json::encode(array_merge([
+			'url' => $this->link('upload!'),
+		], $this->settings));
+		
 		$this->template->extensions = Nette\Utils\Json::encode(array_merge($this->getDefaultExtensions(), $this->extensions));
 		$this->template->contentHtml = $this->contentHtml;
+		$this->template->dropzoneId = $this->dropZoneId ?? ($this->getUniqueId() . '--dropzone');
 
 		$this->doRender();
 	}
@@ -177,59 +218,6 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 		$this->extensions[$name] = $options;
 
 		return $this;
-	}
-
-	/**
-	 * @return \Nette\Application\UI\Form
-	 */
-	protected function createComponentUploadForm(): Nette\Application\UI\Form
-	{
-		$form = new Nette\Application\UI\Form();
-
-		$form->elementPrototype->setAttribute('class', 'dropzone');
-
-		if (is_string($this->dropZoneId)) {
-			$form->elementPrototype->setAttribute('id', $this->dropZoneId);
-		}
-
-		$form->addUpload('file');
-
-		$form->addProtection();
-
-		$form->onSuccess[] = [$this, 'doUpload'];
-
-		return $form;
-	}
-
-	/**
-	 * @internal
-	 * @param \Nette\Application\UI\Form $form
-	 *
-	 * @return void
-	 */
-	public function doUpload(Nette\Application\UI\Form $form): void
-	{
-		try {
-			$file = $form->values->file;
-
-			if (!$file instanceof Nette\Http\FileUpload || !$file->isOk()) {
-				throw SixtyEightPublishers\ImageBundle\Exception\UploadException::invalidFileUpload();
-			}
-
-			if (!$this->isUploadAcceptable($file)) {
-				throw SixtyEightPublishers\ImageBundle\Exception\UploadException::unsupportedType($file->getContentType());
-			}
-
-			$this->eventDispatcher->dispatch(
-				new SixtyEightPublishers\ImageBundle\Event\FileUploadEvent($file),
-				SixtyEightPublishers\ImageBundle\Event\FileUploadEvent::NAME
-			);
-		} catch (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
-			$this->eventDispatcher->dispatch(
-				new SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent($e),
-				SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent::NAME
-			);
-		}
 	}
 
 	/**

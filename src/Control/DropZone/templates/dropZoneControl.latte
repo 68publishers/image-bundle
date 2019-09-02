@@ -1,8 +1,7 @@
-{form uploadForm, data-dropzone => TRUE, data-dropzone-settings => $settings, data-dropzone-extensions => $extensions}
-	<div class="fallback">{input file}</div>
+<div id="{$dropzoneId}" class="dropzone" data-dropzone data-dropzone-settings="{$settings}" data-dropzone-extensions="{$extensions}">
 	<div n:if="0 < count($contentHtml)" class="dz-message" data-dz-message>
 		{foreach $contentHtml as $html}
 			{$html|noescape}
 		{/foreach}
 	</div>
-{/form}
+</div>

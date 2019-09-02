@@ -15,7 +15,7 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 	/** @var \SixtyEightPublishers\NotificationBundle\INotifierFactory  */
 	private $notifierFactory;
 
-	/** @var \Nette\Application\UI\Presenter|NULL */
+	/** @var \Nette\Application\IPresenter|\Nette\Application\UI\Presenter|NULL */
 	private $presenter;
 
 	/** @var string  */
@@ -44,7 +44,7 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 		$this->notifierFactory = $notifierFactory;
 		$this->presenter = $application->getPresenter();
 
-		$application->onPresenter[] = function ($_, Nette\Application\UI\Presenter $presenter) {
+		$application->onPresenter[] = function ($_, Nette\Application\IPresenter $presenter) {
 			$this->presenter = $presenter;
 		};
 	}
@@ -58,6 +58,10 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 	 */
 	public function onUploadCompleted(SixtyEightPublishers\ImageBundle\Event\UploadCompletedEvent $event): void
 	{
+		if (!$this->isUiPresenter()) {
+			return;
+		}
+
 		$this->getNotifier()
 			->success('upload_completed', $event->getFilesCount())
 			->schedule($this->notificationEndpoint);
@@ -74,6 +78,10 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 	 */
 	public function onUploadError(SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent $event): void
 	{
+		if (!$this->isUiPresenter()) {
+			return;
+		}
+
 		$exception = $event->getException();
 
 		$this->getNotifier()
@@ -95,6 +103,10 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 	 */
 	public function onActionSuccess(SixtyEightPublishers\ImageBundle\Event\ActionSuccessEvent $event): void
 	{
+		if (!$this->isUiPresenter()) {
+			return;
+		}
+
 		if (in_array($event->getActionName(), $this->disabledActions['success'], TRUE)) {
 			return;
 		}
@@ -115,6 +127,10 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 	 */
 	public function onActionError(SixtyEightPublishers\ImageBundle\Event\ActionErrorEvent $event): void
 	{
+		if (!$this->isUiPresenter()) {
+			return;
+		}
+
 		if (in_array($event->getActionName(), $this->disabledActions['error'], TRUE)) {
 			return;
 		}
@@ -196,7 +212,7 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException('Current Presenter is not set.');
 		}
 
-		if (!$this->presenter->isAjax()) {
+		if (!$this->isUiPresenter() || !$this->presenter->isAjax()) {
 			return;
 		}
 
@@ -210,6 +226,14 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 
 		/** @noinspection PhpUndefinedMethodInspection */
 		$this->presenter->redrawMessages();
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function isUiPresenter(): bool
+	{
+		return $this->presenter instanceof Nette\Application\UI\Presenter;
 	}
 	
 	/***************** interface \Symfony\Component\EventDispatcher\EventSubscriberInterface *****************/

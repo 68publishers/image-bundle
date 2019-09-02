@@ -33,6 +33,6 @@ final class CallbackDataStorage implements IDataStorage
 	{
 		$cb = $this->callback;
 
-		return (new ArrayStorage((array) $cb()))->getImages();
+		return (new ArrayDataStorage((array) $cb()))->getImages();
 	}
 }

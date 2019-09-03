@@ -89,7 +89,7 @@ class SaveManipulator implements ISaveManipulator
 		try {
 			$storage->save($resource);
 		} catch (SixtyEightPublishers\ImageStorage\Exception\FilesystemException $e) {
-			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - resource saving', (string) $resource, 0, $e);
+			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - resource saving', (string) $resource->getInfo(), 0, $e);
 		}
 
 		$transaction = $this->transactionFactory->create(function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageStorage\ImageInfo $imageInfo) {

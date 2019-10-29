@@ -98,7 +98,9 @@ final class ImageManagerConfigurationStatementFactory
 			}
 		});
 		
-		$this->validateIfKeyExists($options, 'thumbnail_preset', 'null|string');
+		$this->validateIfKeyExists($options, 'thumbnail.preset', 'null|string');
+
+		$this->validateIfKeyExists($options, 'thumbnail.descriptor', 'null|' . Nette\DI\Statement::class);
 
 		$this->validateIfKeyExists($options, 'dropzone.id', 'null|string');
 

@@ -20,6 +20,9 @@ class SaveManipulatorOptions
 	/** @var NULL|callable */
 	private $transactionExtensionCallback;
 
+	/** @var array  */
+	private $customMetadata = [];
+
 	/**
 	 * @param string $namespace
 	 *
@@ -77,6 +80,27 @@ class SaveManipulatorOptions
 	}
 
 	/**
+	 * @param array $metadata
+	 *
+	 * @return void
+	 */
+	public function setCustomMetadata(array $metadata): void
+	{
+		$this->customMetadata = $metadata;
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed  $value
+	 *
+	 * @return void
+	 */
+	public function addCustomMetadata(string $name, $value): void
+	{
+		$this->customMetadata[$name] = $value;
+	}
+
+	/**
 	 * @param \Nette\Http\FileUpload $fileUpload
 	 *
 	 * @return string
@@ -120,5 +144,13 @@ class SaveManipulatorOptions
 
 			$cb($transaction);
 		}
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getCustomMetadata(): array
+	{
+		return $this->customMetadata;
 	}
 }

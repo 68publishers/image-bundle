@@ -94,9 +94,7 @@ final class ConfiguredImageManagerControlFactory
 			$control->setSaveManipulatorOptions($config->get('save_manipulator_options'));
 		}
 
-		if (is_string($config->get('thumbnail_preset'))) {
-			$control->setThumbnailPreset($config->get('thumbnail_preset'));
-		}
+		$control->setThumbnailOptions($config->get('thumbnail.preset'), $config->get('thumbnail.descriptor'));
 
 		$dispatcher = $control->getEventDispatcher();
 

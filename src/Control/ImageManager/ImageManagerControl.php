@@ -54,6 +54,9 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	/** @var string|NULL */
 	private $thumbnailPreset;
 
+	/** @var \SixtyEightPublishers\ImageStorage\Responsive\Descriptor\IDescriptor|NULL */
+	private $thumbnailDescriptor;
+
 	/**
 	 * @param \SixtyEightPublishers\ImageBundle\Storage\IDataStorage                     $dataStorage
 	 * @param \SixtyEightPublishers\ImageBundle\Control\DropZone\IDropZoneControlFactory $dropZoneControlFactory
@@ -171,6 +174,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		$this->template->allowUpload = $allowUpload = (NULL === $maxFiles || $maxFiles > 0);
 		$this->template->denyUpload = !$allowUpload;
 		$this->template->thumbnailPreset = $this->thumbnailPreset;
+		$this->template->thumbnailDescriptor = $this->thumbnailDescriptor;
 
 		$this->doRender();
 	}
@@ -229,13 +233,15 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	}
 
 	/**
-	 * @param string $thumbnailPreset
+	 * @param string|NULL                                                               $preset
+	 * @param \SixtyEightPublishers\ImageStorage\Responsive\Descriptor\IDescriptor|NULL $descriptor
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl
 	 */
-	public function setThumbnailPreset(string $thumbnailPreset): self
+	public function setThumbnailOptions(?string $preset, ?SixtyEightPublishers\ImageStorage\Responsive\Descriptor\IDescriptor $descriptor = NULL): self
 	{
-		$this->thumbnailPreset = $thumbnailPreset;
+		$this->thumbnailPreset = $preset;
+		$this->thumbnailDescriptor = $descriptor;
 
 		return $this;
 	}

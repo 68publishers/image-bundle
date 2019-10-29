@@ -18,6 +18,7 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 	private $defaults = [
 		'image_entity' => SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image::class, # or array [entity => class name, mapping: array]
 		'image_entity_factory' => NULL,
+		'resource_metadata_factory' => SixtyEightPublishers\ImageBundle\ResourceMetadata\ResourceMetadataFactory::class,
 		'data_storage_factory' => SixtyEightPublishers\ImageBundle\Storage\DataStorageFactory::class,
 		'image_managers' => [],
 		'templates' => [
@@ -47,6 +48,7 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 		Nette\Utils\Validators::assertField($config, 'image_managers', 'array[]');
 
 		$this->registerImageEntityFactory($builder, $config);
+		$this->registerResourceMetadataFactory($builder, $config);
 		$this->registerDataStorageFactory($builder, $config);
 
 		$builder->addDefinition($this->prefix('event_subscriber.delete_image_source'))
@@ -141,6 +143,26 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 			$builder->addDefinition($this->prefix('image_entity_factory'))
 				->setType(SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory::class)
 				->setFactory($imageEntityFactory);
+		}
+	}
+
+	/**
+	 * @param \Nette\DI\ContainerBuilder $builder
+	 * @param array                      $config
+	 *
+	 * @return void
+	 * @throws \Nette\Utils\AssertionException
+	 */
+	private function registerResourceMetadataFactory(Nette\DI\ContainerBuilder $builder, array $config): void
+	{
+		Nette\Utils\Validators::assertField($config, 'resource_metadata_factory', 'string|' . Nette\DI\Statement::class);
+
+		$resourceMetadataFactory = $config['resource_metadata_factory'];
+
+		if ($this->needRegister($resourceMetadataFactory)) {
+			$builder->addDefinition($this->prefix('resource_metadata_factory'))
+				->setType(SixtyEightPublishers\ImageBundle\ResourceMetadata\IResourceMetadataFactory::class)
+				->setFactory($resourceMetadataFactory);
 		}
 	}
 

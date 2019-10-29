@@ -17,6 +17,9 @@ class SaveManipulator implements ISaveManipulator
 	/** @var \SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory  */
 	private $imageEntityFactory;
 
+	/** @var \SixtyEightPublishers\ImageBundle\ResourceMetadata\IResourceMetadataFactory  */
+	private $resourceMetadataFactory;
+
 	/** @var \SixtyEightPublishers\ImageStorage\IImageStorageProvider  */
 	private $imageStorageProvider;
 
@@ -27,18 +30,21 @@ class SaveManipulator implements ISaveManipulator
 	private $imageStorageName;
 
 	/**
-	 * @param \SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory       $imageEntityFactory
-	 * @param \SixtyEightPublishers\ImageStorage\IImageStorageProvider                  $imageStorageProvider
-	 * @param \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory
-	 * @param string|NULL                                                               $imageStorageName
+	 * @param \SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory         $imageEntityFactory
+	 * @param \SixtyEightPublishers\ImageBundle\ResourceMetadata\IResourceMetadataFactory $resourceMetadataFactory
+	 * @param \SixtyEightPublishers\ImageStorage\IImageStorageProvider                    $imageStorageProvider
+	 * @param \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory   $transactionFactory
+	 * @param string|NULL                                                                 $imageStorageName
 	 */
 	public function __construct(
 		SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory $imageEntityFactory,
+		SixtyEightPublishers\ImageBundle\ResourceMetadata\IResourceMetadataFactory $resourceMetadataFactory,
 		SixtyEightPublishers\ImageStorage\IImageStorageProvider $imageStorageProvider,
 		SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory,
 		?string $imageStorageName = NULL
 	) {
 		$this->imageEntityFactory = $imageEntityFactory;
+		$this->resourceMetadataFactory = $resourceMetadataFactory;
 		$this->imageStorageProvider = $imageStorageProvider;
 		$this->transactionFactory = $transactionFactory;
 		$this->imageStorageName = $imageStorageName;
@@ -85,6 +91,7 @@ class SaveManipulator implements ISaveManipulator
 	{
 		$storage = $this->imageStorageProvider->get($this->imageStorageName);
 		$resource = $this->createResource($storage, $fileUpload, $options);
+		$metadata = array_merge($this->resourceMetadataFactory->create($resource), $options->getCustomMetadata());
 
 		try {
 			$storage->save($resource);
@@ -92,11 +99,12 @@ class SaveManipulator implements ISaveManipulator
 			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - resource saving', (string) $resource->getInfo(), 0, $e);
 		}
 
-		$transaction = $this->transactionFactory->create(function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageStorage\ImageInfo $imageInfo) {
+		$transaction = $this->transactionFactory->create(function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageStorage\ImageInfo $imageInfo) use ($metadata) {
 			$image = $this->imageEntityFactory->create(
 				SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfoFactory::create($imageInfo, $this->imageStorageName)
 			);
 
+			$image->setMetadata($metadata);
 			$em->persist($image);
 
 			return $image;

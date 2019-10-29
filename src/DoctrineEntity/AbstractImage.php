@@ -45,6 +45,13 @@ abstract class AbstractImage implements IImage
 	protected $source;
 
 	/**
+	 * @ORM\Column(type="json")
+	 *
+	 * @var array
+	 */
+	protected $metadata = [];
+
+	/**
 	 * @param \SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfo $info
 	 * @param \Ramsey\Uuid\UuidInterface|NULL                                     $uuid
 	 *
@@ -102,10 +109,6 @@ abstract class AbstractImage implements IImage
 		return rtrim(strtr(base64_encode($version), '+/', '-_'), '=');
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-
 	/***************** interface \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage *****************/
 
 	/**
@@ -130,6 +133,26 @@ abstract class AbstractImage implements IImage
 	public function getCreated(): \DateTime
 	{
 		return $this->created;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getMetadata(string $key = NULL, $default = NULL)
+	{
+		if (NULL === $key) {
+			return $this->metadata;
+		}
+
+		return $this->metadata[$key] ?? $default;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function setMetadata(array $metadata): void
+	{
+		$this->metadata = $metadata;
 	}
 
 	/**

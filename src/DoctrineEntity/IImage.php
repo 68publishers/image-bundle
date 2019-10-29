@@ -24,6 +24,21 @@ interface IImage
 	public function getCreated(): \DateTime;
 
 	/**
+	 * @param string|NULL $key
+	 * @param mixed|NULL  $default
+	 *
+	 * @return mixed|array|NULL
+	 */
+	public function getMetadata(string $key = NULL, $default = NULL);
+
+	/**
+	 * @param array $metadata
+	 *
+	 * @return void
+	 */
+	public function setMetadata(array $metadata): void;
+
+	/**
 	 * Updates the version of a source and a `updated` field
 	 *
 	 * @return void

@@ -50,20 +50,18 @@ class SaveManipulator implements ISaveManipulator
 		$this->imageStorageName = $imageStorageName;
 	}
 
+	/********** interface \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator **********/
+
 	/**
-	 * @param \SixtyEightPublishers\ImageStorage\Resource\IResourceFactory                         $resourceFactory
-	 * @param \Nette\Http\FileUpload                                                               $fileUpload
-	 * @param \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions $options
-	 *
-	 * @return \SixtyEightPublishers\ImageStorage\Resource\IResource
-	 * @throws \SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException
+	 * {@inheritdoc}
 	 */
-	protected function createResource(SixtyEightPublishers\ImageStorage\Resource\IResourceFactory $resourceFactory, Nette\Http\FileUpload $fileUpload, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageStorage\Resource\IResource
+	public function createResource(Nette\Http\FileUpload $fileUpload, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageStorage\Resource\IResource
 	{
+		$storage = $this->imageStorageProvider->get($this->imageStorageName);
 		$path = sprintf('%s/%s', $options->createNamespace($fileUpload), $options->createSourceName($fileUpload));
 
 		try {
-			$resource = $resourceFactory->createResourceFromLocalFile(
+			$resource = $storage->createResourceFromLocalFile(
 				new SixtyEightPublishers\ImageStorage\ImageInfo($path),
 				$fileUpload->getTemporaryFile()
 			);
@@ -82,15 +80,12 @@ class SaveManipulator implements ISaveManipulator
 		throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - resource creating', $path, 0, $e ?? NULL);
 	}
 
-	/********** interface \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator **********/
-
 	/**
 	 * {@inheritdoc}
 	 */
-	public function save(Nette\Http\FileUpload $fileUpload, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
+	public function save(SixtyEightPublishers\ImageStorage\Resource\IResource $resource, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{
 		$storage = $this->imageStorageProvider->get($this->imageStorageName);
-		$resource = $this->createResource($storage, $fileUpload, $options);
 		$metadata = array_merge($this->resourceMetadataFactory->create($resource), $options->getCustomMetadata());
 
 		try {
@@ -108,6 +103,10 @@ class SaveManipulator implements ISaveManipulator
 			$em->persist($image);
 
 			return $image;
+		});
+
+		$transaction->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
+			throw $e;
 		});
 
 		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($resource) {

@@ -42,6 +42,9 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	/** @var \SixtyEightPublishers\ImageBundle\Action\IAction[] */
 	private $actions = [];
 
+	/** @var \SixtyEightPublishers\ImageBundle\ResourceValidator\IResourceValidator[] */
+	private $resourceValidators = [];
+
 	/** @var array  */
 	private $deleteExistingImageIfMaxAllowedReached = [ FALSE, self::DIRECTION_TOP ];
 
@@ -137,6 +140,18 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		}
 
 		$this->actions[] = $action;
+
+		return $this;
+	}
+
+	/**
+	 * @param \SixtyEightPublishers\ImageBundle\ResourceValidator\IResourceValidator $resourceValidator
+	 *
+	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl
+	 */
+	public function addResourceValidator(SixtyEightPublishers\ImageBundle\ResourceValidator\IResourceValidator $resourceValidator): self
+	{
+		$this->resourceValidators[] = $resourceValidator;
 
 		return $this;
 	}
@@ -339,13 +354,21 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	 * @throws \SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException
+	 * @throws \SixtyEightPublishers\ImageBundle\Exception\IException
 	 */
 	private function doImageUpload(Nette\Http\FileUpload $fileUpload): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{
 		/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator $manipulator */
 		$manipulator = $this->storage->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator::class);
+		$options = $this->saveManipulatorOptions ?? new SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions();
 
-		return $manipulator->save($fileUpload, $this->saveManipulatorOptions ?? new SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions());
+		$resource = $manipulator->createResource($fileUpload, $options);
+
+		foreach ($this->resourceValidators as $resourceValidator) {
+			$resourceValidator->validate($resource);
+		}
+
+		return $manipulator->save($resource, $options);
 	}
 
 	/**
@@ -373,6 +396,10 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 			$deleteManipulator->delete($imageForDelete);
 
 			return $this->doImageUpload($fileUpload);
+		});
+
+		$transaction->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
+			throw $e;
 		});
 
 		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) {

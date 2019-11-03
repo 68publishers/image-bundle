@@ -64,6 +64,10 @@ class DeleteManipulator implements IDeleteManipulator
 			? $this->createSoftDeleteTransaction()
 			: $this->createStandardDeleteTransaction();
 
+		$transaction->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
+			throw $e;
+		});
+
 		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($image) {
 			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('delete', (string) $image->getSource(), 0, $e);
 		});

@@ -102,6 +102,20 @@ final class ImageManagerConfigurationStatementFactory
 
 		$this->validateIfKeyExists($options, 'thumbnail.descriptor', 'null|' . Nette\DI\Statement::class);
 
+		$this->validateIfKeyExists($options, 'resource_validators', 'array', function (array $validators, array &$options) use ($name) {
+			foreach ($validators as $key => $validator) {
+				if (!$this->extension->needRegister($validator)) {
+					continue;
+				}
+
+				$options['resource_validators'][$key] = $this->extension->getContainerBuilder()
+					->addDefinition($this->extension->prefix('resource_validator.' . $name . '.' . $key))
+					->setType(SixtyEightPublishers\ImageBundle\ResourceValidator\IResourceValidator::class)
+					->setFactory($validator)
+					->setAutowired(FALSE);
+			}
+		});
+
 		$this->validateIfKeyExists($options, 'dropzone.id', 'null|string');
 
 		$this->validateIfKeyExists($options, 'dropzone.template', 'null|string', function (?string $template, array &$options) {

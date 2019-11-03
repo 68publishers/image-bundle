@@ -96,6 +96,10 @@ final class ConfiguredImageManagerControlFactory
 
 		$control->setThumbnailOptions($config->get('thumbnail.preset'), $config->get('thumbnail.descriptor'));
 
+		foreach ($config->get('resource_validators') as $resourceValidator) {
+			$control->addResourceValidator($resourceValidator);
+		}
+
 		$dispatcher = $control->getEventDispatcher();
 
 		foreach ($config->get('event_subscribers') as $eventSubscriber) {

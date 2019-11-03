@@ -28,6 +28,7 @@ final class Configuration
 			'preset' => NULL,
 			'descriptor' => NULL,
 		],
+		'resource_validators' => [],
 		'dropzone' => [
 			'id' => NULL,
 			'template' => NULL,

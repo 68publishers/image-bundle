@@ -82,13 +82,7 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 			return;
 		}
 
-		$exception = $event->getException();
-
-		$this->getNotifier()
-			->error('upload_error', [
-				'code' => $exception->getCode(),
-				'message' => $exception->getMessage(),
-			])
+		$this->createErrorNotificationBuilder('upload_error', $event->getException())
 			->schedule($this->notificationEndpoint);
 
 		$this->redrawMessages();
@@ -135,13 +129,7 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 			return;
 		}
 
-		$exception = $event->getException();
-
-		$this->getNotifier()
-			->error('action_error.' . $event->getActionName(), [
-				'code' => $exception->getCode(),
-				'message' => $exception->getMessage(),
-			])
+		$this->createErrorNotificationBuilder('action_error.' . $event->getActionName(), $event->getException())
 			->schedule($this->notificationEndpoint);
 
 		$this->redrawMessages();
@@ -234,6 +222,26 @@ final class NotificationEventSubscriber implements Symfony\Component\EventDispat
 	private function isUiPresenter(): bool
 	{
 		return $this->presenter instanceof Nette\Application\UI\Presenter;
+	}
+
+	/**
+	 * @param string                                                 $messageBase
+	 * @param \SixtyEightPublishers\ImageBundle\Exception\IException $e
+	 *
+	 * @return \SixtyEightPublishers\NotificationBundle\Notification\NotificationBuilder
+	 */
+	private function createErrorNotificationBuilder(string $messageBase, SixtyEightPublishers\ImageBundle\Exception\IException $e): SixtyEightPublishers\NotificationBundle\Notification\NotificationBuilder
+	{
+		$notifier = $this->getNotifier();
+
+		if ($e instanceof SixtyEightPublishers\ImageBundle\Exception\TranslatableException) {
+			return $notifier->error($messageBase . '.' . $e->getMessage(), $e->getArgs());
+		}
+
+		return $notifier->error($messageBase . '.default', [
+			'code' => $e->getCode(),
+			'message' => $e->getMessage(),
+		]);
 	}
 	
 	/***************** interface \Symfony\Component\EventDispatcher\EventSubscriberInterface *****************/

@@ -69,8 +69,10 @@
             Toastr = window.toastr;
         }
 
-        args.dropzone.on('error', function (file, errorMessage) {
-            Toastr.error(errorMessage.replace('{{fileName}}', '<strong>' + file.name + '</strong>'));
+        args.dropzone.on('error', function (file, payload) {
+            if ('string' === typeof payload) {
+                Toastr.error(payload.replace('{{fileName}}', '<strong>' + file.name + '</strong>'));
+            }
         });
     });
 

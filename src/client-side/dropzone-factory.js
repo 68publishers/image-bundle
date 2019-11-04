@@ -156,9 +156,20 @@
             callWatchers(id);
 
             // Nette snippets after single upload
-            dropzone.on('success', function (file, xhr) {
-                if (typeof xhr === 'object' && xhr.hasOwnProperty('snippets')) {
-                    $.nette.ext('snippets').updateSnippets(xhr.snippets);
+            dropzone.on('success', function (file, payload) {
+                if (typeof payload === 'object' && payload.hasOwnProperty('snippets')) {
+                    $.nette.ext('snippets').updateSnippets(payload.snippets);
+                }
+            });
+
+            dropzone.on('error', function (file, payload, xhr) {
+                if (typeof payload === 'object' && payload.hasOwnProperty('snippets')) {
+                    $.nette.ext('snippets').updateSnippets(payload.snippets);
+                }
+
+                if ('object' === typeof xhr && 406 === xhr.status) {
+                    file.accepted = false;
+                    this.removeFile(file);
                 }
             });
         };

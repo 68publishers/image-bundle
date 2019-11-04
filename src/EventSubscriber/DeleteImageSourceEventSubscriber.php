@@ -45,8 +45,12 @@ final class DeleteImageSourceEventSubscriber implements Doctrine\Common\EventSub
 	/**
 	 * {@inheritdoc}
 	 */
-	public function postFlush(): void
+	public function postFlush(Doctrine\ORM\Event\PostFlushEventArgs $args): void
 	{
+		if (!SixtyEightPublishers\DoctrinePersistence\Transaction\Helper::isEverythingCommitted($args->getEntityManager())) {
+			return;
+		}
+
 		while (!$this->queue->isEmpty()) {
 			/** @var \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image */
 			$image = $this->queue->dequeue();

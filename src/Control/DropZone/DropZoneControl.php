@@ -18,6 +18,9 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 	/** @var \Nette\Http\IRequest  */
 	private $request;
 
+	/** @var \Nette\Http\IResponse  */
+	private $response;
+
 	/** @var array  */
 	private $settings = [];
 
@@ -39,15 +42,18 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 	/**
 	 * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
 	 * @param \Nette\Http\IRequest                                        $request
+	 * @param \Nette\Http\IResponse                                       $response
 	 */
 	public function __construct(
 		Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher,
-		Nette\Http\IRequest $request
+		Nette\Http\IRequest $request,
+		Nette\Http\IResponse $response
 	) {
 		parent::__construct();
 
 		$this->eventDispatcher = $eventDispatcher;
 		$this->request = $request;
+		$this->response = $response;
 	}
 
 	/**
@@ -77,6 +83,8 @@ final class DropZoneControl extends SixtyEightPublishers\SmartNetteComponent\UI\
 				new SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent($e),
 				SixtyEightPublishers\ImageBundle\Event\UploadErrorEvent::NAME
 			);
+
+			$this->response->setCode(Nette\Http\IResponse::S406_NOT_ACCEPTABLE);
 		}
 	}
 

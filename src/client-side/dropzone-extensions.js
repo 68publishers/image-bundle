@@ -53,7 +53,8 @@
 
             $.nette.ajax({
                 url: options.url,
-                data: data
+                data: data,
+                off: ['unique']
             });
         });
     });

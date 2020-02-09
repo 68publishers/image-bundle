@@ -32,6 +32,8 @@ message:
 			default: Obrázek se nepodařilo otočit.
 		rotate_right:
 			default: Obrázek se nepodařilo otočit.
+		sort:
+			default: Obrázky se nepodařilo přemístit.
 
 denied_upload_message: Další obrázky nelze nahrát.
 

@@ -31,6 +31,8 @@ message:
 			default: Couldn't rotate image.
 		rotate_right:
 			default: Couldn't rotate image.
+		sort:
+			default: Couldn't sort images.
 
 denied_upload_message: More images cannot be uploaded.
 

@@ -6,7 +6,6 @@ namespace SixtyEightPublishers\ImageBundle\Storage;
 
 use Nette;
 use Doctrine;
-use SixtyEightPublishers;
 
 final class CallbackDataStorage implements IDataStorage
 {

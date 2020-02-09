@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SixtyEightPublishers\ImageBundle\DI;
 
+use Gedmo;
 use Kdyby;
 use Nette;
 use Symfony;
+use Doctrine;
 use SixtyEightPublishers;
 
 final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
@@ -14,6 +16,8 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 	Kdyby\Doctrine\DI\ITargetEntityProvider,
 	Kdyby\Translation\DI\ITranslationProvider
 {
+	public const SOFT_DELETE_FILTER_NAME = 'soft-delete';
+
 	/** @var array  */
 	private $defaults = [
 		'image_entity' => SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image::class, # or array [entity => class name, mapping: array]
@@ -24,6 +28,10 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 		'templates' => [
 			'image_manager_control' => NULL,
 			'dropzone_control' => NULL,
+		],
+		'soft_delete' => [
+			'register_listener' => FALSE,
+			'register_filter' => FALSE,
 		],
 	];
 
@@ -73,6 +81,43 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 				'name' => (string) $name,
 				'configuration' => $configurationStatementFactory->create((string) $name, $options),
 			]);
+		}
+
+		$softDeleteConfig = $this->getSoftDeleteConfig();
+
+		if (TRUE === $softDeleteConfig['register_listener']) {
+			$reader = $builder->getByType(Doctrine\Common\Annotations\Reader::class, FALSE);
+
+			$softDeleteListener = $builder->addDefinition($this->prefix('event_subscriber.gedmo.soft_delete_listener'))
+				->setType(Gedmo\SoftDeleteable\SoftDeleteableListener::class);
+
+			if (NULL !== $reader) {
+				$softDeleteListener->addSetup('setAnnotationReader', [
+					'reader' => '@' . $reader,
+				]);
+			}
+		}
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @throws \Nette\Utils\AssertionException
+	 */
+	public function beforeCompile(): void
+	{
+		$builder = $this->getContainerBuilder();
+		$softDeleteConfig = $this->getSoftDeleteConfig();
+
+		if (TRUE === $softDeleteConfig['register_filter']) {
+			$builder->getDefinitionByType(Doctrine\ORM\EntityManagerInterface::class)
+				->addSetup('$service->getConfiguration()->addFilter(?, ?)', [
+					self::SOFT_DELETE_FILTER_NAME,
+					Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter::class,
+				])
+				->addSetup('$service->getFilters()->enable(?)', [
+					self::SOFT_DELETE_FILTER_NAME,
+				]);
 		}
 	}
 
@@ -215,6 +260,47 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 		}
 
 		return $this->imageEntityDefinition = $imageEntity;
+	}
+
+	/**
+	 * @return array
+	 * @throws \Nette\Utils\AssertionException
+	 */
+	private function getSoftDeleteConfig(): array
+	{
+		$config = $this->getConfig($this->defaults);
+
+		Nette\Utils\Validators::assertField($config, 'soft_delete', 'array');
+		Nette\Utils\Validators::assertField($config['soft_delete'], 'register_listener', 'bool');
+		Nette\Utils\Validators::assertField($config['soft_delete'], 'register_filter', 'bool');
+
+		$entity = $this->getImageEntityDefinition()['entity'];
+		$softDelete = $config['soft_delete'];
+
+		$enabledOptions = array_map(function (string $v) {
+			return $this->name . '.soft_delete' . $v;
+		}, array_keys(array_filter([$softDelete['register_listener'], $softDelete['register_filter']])));
+
+		if ((0 < count($enabledOptions)) && !is_subclass_of($entity, SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class, TRUE)) {
+			throw new Nette\Utils\AssertionException(sprintf(
+				'Logical mismatch. A soft delete dependencies should by register according to the configuration (%s %s) but an Image entity is not implementor of an interface %s.',
+				1 < count($enabledOptions) ? 'options' : 'an option',
+				implode(', ', $enabledOptions),
+				SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class
+			));
+		}
+
+		/** @noinspection ClassConstantCanBeUsedInspection */
+		if (TRUE === $softDelete['register_listener'] && !class_exists('Gedmo\SoftDeleteable\SoftDeleteableListener')) {
+			throw new Nette\Utils\AssertionException('Class Gedmo\SoftDeleteable\SoftDeleteableListener not found. Please add a dependency on a package gedmo/doctrine-extensions.');
+		}
+
+		/** @noinspection ClassConstantCanBeUsedInspection */
+		if (TRUE === $softDelete['register_filter'] && !class_exists('Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter')) {
+			throw new Nette\Utils\AssertionException('Class Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter not found. Please add a dependency on a package gedmo/doctrine-extensions.');
+		}
+
+		return $softDelete;
 	}
 
 	/**************** interface \Kdyby\Doctrine\DI\IEntityProvider ****************/

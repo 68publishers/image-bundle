@@ -7,14 +7,14 @@ namespace SixtyEightPublishers\ImageBundle\DoctrineEntity;
 interface ISoftDeletableImage extends IImage
 {
 	/**
-	 * @return void
+	 * @param \DateTime|NULL $deletedAt
 	 */
-	public function delete(): void;
+	public function setDeletedAt(?\DateTime $deletedAt): void;
 
 	/**
-	 * @return void
+	 * @return \DateTime|NULL
 	 */
-	public function restore(): void;
+	public function getDeletedAt(): ?\DateTime;
 
 	/**
 	 * @return bool

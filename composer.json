@@ -10,25 +10,27 @@
 		}
 	],
 	"require": {
-		"php": "~7.1",
-		"nette/di": "~2.4",
-		"nette/utils": "~2.4",
-		"nette/application": "~2.4",
-		"nette/forms": "~2.4",
+		"php": "^7.1",
+		"nette/di": "^2.4",
+		"nette/utils": "^2.4",
+		"nette/application": "^2.4",
+		"nette/forms": "^2.4",
 		"ramsey/uuid": "^3.8",
 		"68publishers/smart-nette-component": "^0.1",
 		"68publishers/doctrine-persistence": "^0.1",
 		"68publishers/image-storage": "^0.2",
 		"symfony/event-dispatcher": "^4.0",
 		"kdyby/doctrine": "^3.0",
-		"kdyby/translation": "~2.4"
+		"kdyby/translation": "^2.4"
 	},
 	"require-dev": {
 		"friendsofphp/php-cs-fixer": "^2.0",
 		"nette/tester": "^1.7",
-		"68publishers/notification-bundle": "^0.1"
+		"68publishers/notification-bundle": "^0.1",
+		"gedmo/doctrine-extensions": "^2.4"
 	},
 	"suggest": {
+		"gedmo/doctrine-extensions": "If you want to use soft-deletable images.",
 		"68publishers/notification-bundle": "For automatic notifications (flash message, toastr) on image upload, deletion etc."
 	},
 	"autoload": {

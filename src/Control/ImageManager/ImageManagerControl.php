@@ -112,6 +112,44 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	}
 
 	/**
+	 * @param string|NULL $sortedId
+	 * @param string|NULL $previousId
+	 * @param string|NULL $nextId
+	 *
+	 * @return void
+	 * @throws \SixtyEightPublishers\ImageBundle\Exception\InvalidStateException
+	 */
+	public function handleSort(?string $sortedId, ?string $previousId, ?string $nextId): void
+	{
+		if (NULL === $sortedId) {
+			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException(sprintf(
+				'Parameter $sortedId passed into %s must be type of string.',
+				__METHOD__
+			));
+		}
+
+		try {
+			/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator $manipulator */
+			$manipulator = $this->storage->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator::class);
+
+			$manipulator->sort(
+				$this->findImage($sortedId),
+				NULL !== $previousId ? $this->findImage($previousId) : NULL,
+				NULL !== $nextId ? $this->findImage($nextId) : NULL
+			);
+		} catch (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
+			$this->eventDispatcher->dispatch(
+				new SixtyEightPublishers\ImageBundle\Event\ActionErrorEvent('sort', $e),
+				SixtyEightPublishers\ImageBundle\Event\ActionErrorEvent::NAME
+			);
+
+			$this->redrawImages();
+
+			return;
+		}
+	}
+
+	/**
 	 * @param \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions $saveManipulatorOptions
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl
@@ -174,6 +212,9 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @throws \Nette\Utils\JsonException
+	 * @throws \Nette\Application\UI\InvalidLinkException
 	 */
 	public function render(): void
 	{
@@ -190,6 +231,18 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		$this->template->denyUpload = !$allowUpload;
 		$this->template->thumbnailPreset = $this->thumbnailPreset;
 		$this->template->thumbnailDescriptor = $this->thumbnailDescriptor;
+		$this->template->sortable = $sortable = $this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator::class);
+
+		if (TRUE === $sortable) {
+			$this->template->sortableRequest = Nette\Utils\Json::encode([
+				'endpoint' => $this->link('sort!'),
+				'parameters' => [
+					'sorted_id' => $this->getUniqueId() . '-sortedId',
+					'previous_id' => $this->getUniqueId() . '-previousId',
+					'next_id' => $this->getUniqueId() . '-nextId',
+				],
+			]);
+		}
 
 		$this->doRender();
 	}

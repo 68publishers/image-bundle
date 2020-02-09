@@ -6,7 +6,6 @@ namespace SixtyEightPublishers\ImageBundle\Event;
 
 use Nette;
 use Symfony;
-use SixtyEightPublishers;
 
 final class UploadCompletedEvent extends Symfony\Contracts\EventDispatcher\Event
 {

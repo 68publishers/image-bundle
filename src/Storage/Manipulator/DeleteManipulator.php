@@ -24,35 +24,6 @@ class DeleteManipulator implements IDeleteManipulator
 		$this->transactionFactory = $transactionFactory;
 	}
 
-	/**
-	 * @return \SixtyEightPublishers\DoctrinePersistence\Transaction\Transaction
-	 */
-	protected function createSoftDeleteTransaction(): SixtyEightPublishers\DoctrinePersistence\Transaction\Transaction
-	{
-		$transaction = $this->transactionFactory->create(static function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage $image) {
-			$image->delete();
-			$em->persist($image);
-
-			return $image->getSource();
-		});
-
-		return $transaction;
-	}
-
-	/**
-	 * @return \SixtyEightPublishers\DoctrinePersistence\Transaction\Transaction
-	 */
-	protected function createStandardDeleteTransaction(): SixtyEightPublishers\DoctrinePersistence\Transaction\Transaction
-	{
-		$transaction = $this->transactionFactory->create(static function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image) {
-			$em->remove($image);
-
-			return $image->getSource();
-		});
-
-		return $transaction;
-	}
-
 	/********** interface \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator **********/
 
 	/**
@@ -60,9 +31,11 @@ class DeleteManipulator implements IDeleteManipulator
 	 */
 	public function delete(SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
 	{
-		$transaction = $image instanceof SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage
-			? $this->createSoftDeleteTransaction()
-			: $this->createStandardDeleteTransaction();
+		$transaction = $this->transactionFactory->create(static function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image) {
+			$em->remove($image);
+
+			return $image->getSource();
+		});
 
 		$transaction->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
 			throw $e;

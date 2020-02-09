@@ -4,29 +4,39 @@ declare(strict_types=1);
 
 namespace SixtyEightPublishers\ImageBundle\DoctrineEntity;
 
+use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+
+/**
+ * (!) ADD THIS ANNOTATION INTO YOUR ENTITY:
+ *
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ */
 trait TSoftDeletableImage
 {
 	/**
-	 * @ORM\Column(type="boolean")
+	 * @var \DateTime|NULL
 	 *
-	 * @var bool
+	 * @ORM\Column(type="datetime", nullable=true)
 	 */
-	protected $deleted = FALSE;
+	protected $deletedAt;
 
 	/**
+	 * @param \DateTime|NULL $deletedAt
+	 *
 	 * @return void
 	 */
-	public function delete(): void
+	public function setDeletedAt(?\DateTime $deletedAt): void
 	{
-		$this->deleted = TRUE;
+		$this->deletedAt = $deletedAt;
 	}
 
 	/**
-	 * @return void
+	 * @return \DateTime|NULL
 	 */
-	public function restore(): void
+	public function getDeletedAt(): ?\DateTime
 	{
-		$this->deleted = FALSE;
+		return $this->deletedAt;
 	}
 
 	/**
@@ -34,6 +44,6 @@ trait TSoftDeletableImage
 	 */
 	public function isDeleted(): bool
 	{
-		return $this->deleted;
+		return NULL !== $this->deletedAt;
 	}
 }

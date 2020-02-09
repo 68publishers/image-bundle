@@ -32,6 +32,6 @@ final class CallbackDataStorage implements IDataStorage
 	{
 		$cb = $this->callback;
 
-		return (new ArrayDataStorage((array) $cb()))->getImages();
+		return new Doctrine\Common\Collections\ArrayCollection((array) $cb());
 	}
 }

@@ -24,16 +24,6 @@ final class DoctrineDataStorage implements IDataStorage
 		$this->qb = $qb;
 	}
 
-	/**
-	 * @return \Doctrine\ORM\Query\Expr\From|NULL
-	 */
-	private function getFrom(): ?Doctrine\ORM\Query\Expr\From
-	{
-		$from = $this->qb->getDQLPart('from');
-
-		return isset($from[0]) && $from[0] instanceof Doctrine\ORM\Query\Expr\From ? $from[0] : NULL;
-	}
-
 	/*************** interface \SixtyEightPublishers\ImageBundle\Storage\IDataStorage ***************/
 
 	/**
@@ -41,18 +31,9 @@ final class DoctrineDataStorage implements IDataStorage
 	 */
 	public function getImages(): Doctrine\Common\Collections\Collection
 	{
-		$qb = clone $this->qb;
-		$from = $this->getFrom();
-
-		# remove soft-deleted images
-		if (NULL !== $from && (is_a($from->getFrom(), SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class, TRUE) || is_subclass_of($from->getFrom(), SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage::class, TRUE))) {
-			$qb->andWhere($from->getAlias() . '.deleted = :__deleted')
-				->setParameter('__deleted', FALSE);
-		}
-
 		$collection = new Doctrine\Common\Collections\ArrayCollection();
 
-		foreach (new Doctrine\ORM\Tools\Pagination\Paginator($qb->getQuery(), FALSE) as $image) {
+		foreach (new Doctrine\ORM\Tools\Pagination\Paginator($this->qb->getQuery(), FALSE) as $image) {
 			if (!$image instanceof SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage) {
 				throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException(sprintf(
 					'Invalid entities returned from passed Query. Entities must be instances of interface %s, %s given.',

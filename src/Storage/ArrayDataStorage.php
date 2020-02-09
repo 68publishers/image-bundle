@@ -43,8 +43,6 @@ final class ArrayDataStorage implements IDataStorage
 	 */
 	public function getImages(): Doctrine\Common\Collections\Collection
 	{
-		return (new Doctrine\Common\Collections\ArrayCollection($this->images))->filter(static function (SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image) {
-			return !$image instanceof SixtyEightPublishers\ImageBundle\DoctrineEntity\ISoftDeletableImage || !$image->isDeleted();
-		});
+		return new Doctrine\Common\Collections\ArrayCollection($this->images);
 	}
 }

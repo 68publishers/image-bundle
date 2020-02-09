@@ -124,7 +124,7 @@ final class ImageManagerConfigurationStatementFactory
 			}
 		});
 
-		$this->validateIfKeyExists($options, 'dropzone.content_html', 'array', function (array $contentHtml, array &$options) {
+		$this->validateIfKeyExists($options, 'dropzone.content_html', 'array', static function (array $contentHtml, array &$options) {
 			foreach ($contentHtml as $key => $html) {
 				$options['dropzone']['content_html'][$key] = $html instanceof Nette\DI\Statement ? $html : new Nette\DI\Statement($html);
 			}

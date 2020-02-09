@@ -28,7 +28,11 @@ final class DeleteImageSourceEventSubscriber implements Doctrine\Common\EventSub
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @internal
+	 *
+	 * @param \Doctrine\ORM\Event\OnFlushEventArgs $args
+	 *
+	 * @return void
 	 */
 	public function onFlush(Doctrine\ORM\Event\OnFlushEventArgs $args): void
 	{
@@ -43,7 +47,11 @@ final class DeleteImageSourceEventSubscriber implements Doctrine\Common\EventSub
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @internal
+	 *
+	 * @param \Doctrine\ORM\Event\PostFlushEventArgs $args
+	 *
+	 * @return void
 	 */
 	public function postFlush(Doctrine\ORM\Event\PostFlushEventArgs $args): void
 	{

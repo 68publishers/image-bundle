@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options;
 
 use Nette;
+use Ramsey;
 use SixtyEightPublishers;
 
 class SaveManipulatorOptions
@@ -120,6 +121,7 @@ class SaveManipulatorOptions
 	 * @param \Nette\Http\FileUpload $fileUpload
 	 *
 	 * @return string
+	 * @throws \Exception
 	 */
 	public function createSourceName(Nette\Http\FileUpload $fileUpload): string
 	{
@@ -129,7 +131,7 @@ class SaveManipulatorOptions
 			return (string) $cb($fileUpload);
 		}
 
-		return $fileUpload->getSanitizedName();
+		return Ramsey\Uuid\Uuid::uuid4()->toString() . '.' . Nette\Utils\Strings::lower(pathinfo($fileUpload->getName(), PATHINFO_EXTENSION));
 	}
 
 	/**

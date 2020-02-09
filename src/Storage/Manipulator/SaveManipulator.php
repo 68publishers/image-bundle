@@ -54,6 +54,8 @@ class SaveManipulator implements ISaveManipulator
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @throws \Exception
 	 */
 	public function createResource(Nette\Http\FileUpload $fileUpload, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageStorage\Resource\IResource
 	{

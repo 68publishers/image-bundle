@@ -59,7 +59,7 @@ abstract class AbstractImage implements IImage
 	 */
 	public function __construct(SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfo $info, ?Ramsey\Uuid\UuidInterface $uuid = NULL)
 	{
-		$this->id = $uuid ?? Ramsey\Uuid\Uuid::uuid1();
+		$this->id = $uuid ?? Ramsey\Uuid\Uuid::uuid4();
 		$this->created = new \DateTime('now', new \DateTimeZone('UTC'));
 		$this->updated = new \DateTime('now', new \DateTimeZone('UTC'));
 

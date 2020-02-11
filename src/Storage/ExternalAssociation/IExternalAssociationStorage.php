@@ -7,6 +7,13 @@ namespace SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation;
 interface IExternalAssociationStorage
 {
 	/**
+	 * @param string $namespace
+	 *
+	 * @return void
+	 */
+	public function setNamespace(string $namespace): void;
+
+	/**
 	 * @return \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IReferenceCollection
 	 */
 	public function getReferences(): IReferenceCollection;

@@ -25,15 +25,24 @@ final class ExternalAssociationDataStorage implements IDataStorage
 	private $entityClassName;
 
 	/**
-	 * @param \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage $externalAssociationStorage
 	 * @param \Doctrine\ORM\EntityManagerInterface                                                      $em
+	 * @param \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage $externalAssociationStorage
+	 * @param string|NULL                                                                               $namespace
 	 * @param string                                                                                    $entityClassName
 	 */
-	public function __construct(SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage $externalAssociationStorage, Doctrine\ORM\EntityManagerInterface $em, string $entityClassName = SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage::class)
-	{
+	public function __construct(
+		Doctrine\ORM\EntityManagerInterface $em,
+		SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage $externalAssociationStorage,
+		?string $namespace = NULL,
+		string $entityClassName = SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage::class
+	) {
 		$this->externalAssociationStorage = $externalAssociationStorage;
 		$this->em = $em;
 		$this->entityClassName = $entityClassName;
+
+		if (NULL !== $namespace) {
+			$externalAssociationStorage->setNamespace($namespace);
+		}
 	}
 
 	/*************** interface \SixtyEightPublishers\ImageBundle\Storage\IDataStorage ***************/

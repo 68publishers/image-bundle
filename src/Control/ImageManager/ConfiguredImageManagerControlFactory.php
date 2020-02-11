@@ -61,7 +61,7 @@ final class ConfiguredImageManagerControlFactory
 		}
 
 		$config = $this->definitions[$name];
-		$dataStorage = $this->dataStorageFactory->create($config->get('storage_class_name'), ...$dataStorageArgs);
+		$dataStorage = $this->dataStorageFactory->create($config->get('storage.class_name'), ...array_merge($config->get('storage.arguments'), $dataStorageArgs));
 
 		foreach ($config->get('manipulators') as $manipulator) {
 			$dataStorage->addManipulator($manipulator);

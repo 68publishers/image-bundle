@@ -34,11 +34,13 @@ final class ImageManagerConfigurationStatementFactory
 	{
 		$this->extension->validateConfig(SixtyEightPublishers\ImageBundle\Control\ImageManager\Configuration::DEFAULTS, $options);
 
-		$this->validateIfKeyExists($options, 'storage_class_name', 'string', static function (string $className) {
+		$this->validateIfKeyExists($options, 'storage.class_name', 'string', static function (string $className) {
 			if (!is_subclass_of($className, SixtyEightPublishers\ImageBundle\Storage\IDataStorage::class, TRUE)) {
-				throw new Nette\Utils\AssertionException('Option "storage_class_name" must be valid class name that implements interface ' . SixtyEightPublishers\ImageBundle\Storage\IDataStorage::class);
+				throw new Nette\Utils\AssertionException('Option "storage.class_name" must be valid class name that implements interface ' . SixtyEightPublishers\ImageBundle\Storage\IDataStorage::class);
 			}
 		});
+
+		$this->validateIfKeyExists($options, 'storage.arguments', 'list');
 
 		$this->validateIfKeyExists($options, 'manipulators', 'array', function (array $manipulators, array &$options) use ($name) {
 			foreach ($manipulators as $key => $manipulator) {

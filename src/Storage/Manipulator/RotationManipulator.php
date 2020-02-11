@@ -10,8 +10,8 @@ use SixtyEightPublishers;
 
 class RotationManipulator implements IRotationManipulator
 {
-	use Nette\SmartObject;
-	use TExtendableTransaction;
+	use Nette\SmartObject,
+		TExtendableTransaction;
 
 	/** @var \SixtyEightPublishers\ImageStorage\IImageStorageProvider  */
 	private $imageStorageProvider;

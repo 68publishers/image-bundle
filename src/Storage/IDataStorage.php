@@ -9,7 +9,7 @@ use Doctrine;
 interface IDataStorage
 {
 	/**
-	 * The parameter $manipulator is class that manipulates with Image eg. instance of IRemovable, ISaveable, IRotatable et..
+	 * The parameter $manipulator is class that manipulates with Image eg. instance of IDeleteManipulator, ISaveManipulator, IRotationManipulator et..
 	 *
 	 * @param object $manipulator
 	 *

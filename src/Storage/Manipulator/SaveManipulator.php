@@ -9,10 +9,11 @@ use Doctrine;
 use Intervention;
 use SixtyEightPublishers;
 
-class SaveManipulator implements ISaveManipulator
+class SaveManipulator implements ISaveManipulator, IExternalAssociationStorageAware
 {
-	use Nette\SmartObject;
-	use TExtendableTransaction;
+	use Nette\SmartObject,
+		TExtendableTransaction,
+		TAssociationStorageAware;
 
 	/** @var \SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory  */
 	private $imageEntityFactory;
@@ -114,6 +115,16 @@ class SaveManipulator implements ISaveManipulator
 		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($resource) {
 			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - doctrine persistence', (string) $resource->getInfo(), 0, $e);
 		});
+
+		# External associations
+		$associationStorage = $this->getExternalAssociationStorage();
+
+		if (NULL !== $associationStorage) {
+			$transaction->finally(static function (SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image) use ($associationStorage) {
+				$associationStorage->getReferences()->add(new SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\Reference((string) $image->getId()));
+				$associationStorage->flush();
+			});
+		}
 
 		$transaction = $transaction->immutable($resource->getInfo());
 

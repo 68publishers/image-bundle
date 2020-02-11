@@ -5,36 +5,23 @@ declare(strict_types=1);
 namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator;
 
 use Nette;
-use Doctrine;
 use SixtyEightPublishers;
 
-abstract class AbstractSortableManipulator implements ISortableManipulator
+abstract class AbstractSortableManipulator implements ISortableManipulator, IExternalAssociationStorageAware
 {
-	use Nette\SmartObject;
-	use TExtendableTransaction;
-
-	/** @var \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory  */
-	private $transactionFactory;
+	use Nette\SmartObject,
+		TAssociationStorageAware;
 
 	/**
-	 * @param \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory
-	 */
-	public function __construct(SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory $transactionFactory)
-	{
-		$this->transactionFactory = $transactionFactory;
-	}
-
-	/**
-	 * Return sorted image!
+	 * Return TRUE if everything is OK otherwise return FALSE or better throw an exception.
 	 *
-	 * @param \Doctrine\ORM\EntityManagerInterface                         $em
 	 * @param \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage      $sortedImage
 	 * @param \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage|NULL $previousImage
 	 * @param \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage|NULL $nextImage
 	 *
-	 * @return \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
+	 * @return bool
 	 */
-	abstract public function doSort(Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $sortedImage, ?SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $previousImage, ?SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $nextImage): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage;
+	abstract public function doSort(SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $sortedImage, ?SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $previousImage, ?SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $nextImage): bool;
 
 	/********** interface \SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator **********/
 
@@ -43,17 +30,38 @@ abstract class AbstractSortableManipulator implements ISortableManipulator
 	 */
 	public function sort(SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $sortedImage, ?SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $previousImage = NULL, ?SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $nextImage = NULL): void
 	{
-		$transaction = $this->transactionFactory->create([$this, 'doSort'])
-			->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
-				throw $e;
-			})
-			->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($sortedImage) {
-				throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('sort', (string) $sortedImage->getSource(), 0, $e);
-			})
-			->immutable($sortedImage, $previousImage, $nextImage);
+		if (FALSE === $this->doSort($sortedImage, $previousImage, $nextImage)) {
+			return;
+		}
 
-		$this->extendTransaction($transaction);
+		# External associations
+		$associationStorage = $this->getExternalAssociationStorage();
 
-		$transaction->run();
+		if (NULL === $associationStorage) {
+			return;
+		}
+
+		$references = $associationStorage->getReferences();
+		$sortedReference = $references->find((string) $sortedImage->getId());
+
+		if (NULL === $sortedReference) {
+			return;
+		}
+
+		$previousReference = NULL !== $previousImage ? $references->find((string) $previousImage->getId()) : NULL;
+
+		if (NULL !== $previousReference) {
+			$references->moveAfter($sortedReference, $previousReference);
+			$associationStorage->flush();
+
+			return;
+		}
+
+		$nextReference = NULL !== $nextImage ? $references->find((string) $nextImage->getId()) : NULL;
+
+		if (NULL !== $nextReference) {
+			$references->moveBefore($sortedReference, $nextReference);
+			$associationStorage->flush();
+		}
 	}
 }

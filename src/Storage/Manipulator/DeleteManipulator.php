@@ -8,10 +8,11 @@ use Nette;
 use Doctrine;
 use SixtyEightPublishers;
 
-class DeleteManipulator implements IDeleteManipulator
+class DeleteManipulator implements IDeleteManipulator, IExternalAssociationStorageAware
 {
-	use Nette\SmartObject;
-	use TExtendableTransaction;
+	use Nette\SmartObject,
+		TExtendableTransaction,
+		TAssociationStorageAware;
 
 	/** @var \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory  */
 	private $transactionFactory;
@@ -44,6 +45,23 @@ class DeleteManipulator implements IDeleteManipulator
 		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($image) {
 			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('delete', (string) $image->getSource(), 0, $e);
 		});
+
+		# External associations
+		$associationStorage = $this->getExternalAssociationStorage();
+
+		if (NULL !== $associationStorage) {
+			$transaction->finally(static function () use ($associationStorage, $image) {
+				$references = $associationStorage->getReferences();
+				$reference = $references->find((string) $image->getId());
+
+				if (NULL === $reference) {
+					return;
+				}
+
+				$references->remove($reference);
+				$associationStorage->flush();
+			});
+		}
 
 		$transaction = $transaction->immutable($image);
 

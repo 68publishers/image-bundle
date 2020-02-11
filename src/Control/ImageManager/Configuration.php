@@ -12,7 +12,10 @@ final class Configuration
 	use Nette\SmartObject;
 
 	public const   DEFAULTS = [
-		'storage_class_name' => SixtyEightPublishers\ImageBundle\Storage\ArrayDataStorage::class,
+		'storage' => [
+			'class_name' => SixtyEightPublishers\ImageBundle\Storage\ArrayDataStorage::class,
+			'arguments' => [],
+		],
 		'manipulators' => [],
 		'actions' => [],
 		'template' => NULL,

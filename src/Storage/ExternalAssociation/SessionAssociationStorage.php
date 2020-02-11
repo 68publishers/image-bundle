@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation;
 
 use Nette;
+use SixtyEightPublishers;
 
 class SessionAssociationStorage implements IExternalAssociationStorage
 {
 	use Nette\SmartObject;
-
-	/** @var string  */
-	private $key;
 	
 	/** @var \Nette\Http\Session  */
 	private $session;
 
 	/** @var \Nette\Http\SessionSection|NULL */
 	private $sessionSection;
+
+	/** @var string|NULL */
+	private $namespace;
 
 	/** @var string|int|\DateTimeInterface  */
 	private $expiration = '1 hour';
@@ -26,12 +27,10 @@ class SessionAssociationStorage implements IExternalAssociationStorage
 	private $collection;
 
 	/**
-	 * @param string              $key
 	 * @param \Nette\Http\Session $session
 	 */
-	public function __construct(string $key, Nette\Http\Session $session)
+	public function __construct(Nette\Http\Session $session)
 	{
-		$this->key = $key;
 		$this->session = $session;
 	}
 
@@ -54,7 +53,7 @@ class SessionAssociationStorage implements IExternalAssociationStorage
 	{
 		if (NULL === $this->sessionSection) {
 			$this->sessionSection = $this->session
-				->getSection(str_replace('\\', '.', static::class) . '/' . $this->key)
+				->getSection(str_replace('\\', '.', static::class) . (NULL === $this->namespace ? '' : '//' . $this->namespace))
 				->setExpiration($this->expiration);
 
 			$this->sessionSection->warnOnUndefined = FALSE;
@@ -64,6 +63,18 @@ class SessionAssociationStorage implements IExternalAssociationStorage
 	}
 
 	/********** interface \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage **********/
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function setNamespace(string $namespace): void
+	{
+		if (NULL !== $this->sessionSection) {
+			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException('A namespace can￿\'t be changed if a session section was already created.');
+		}
+
+		$this->namespace = $namespace;
+	}
 
 	/**
 	 * {@inheritDoc}

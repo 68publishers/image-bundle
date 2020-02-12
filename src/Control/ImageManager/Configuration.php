@@ -15,6 +15,7 @@ final class Configuration
 		'storage' => [
 			'class_name' => SixtyEightPublishers\ImageBundle\Storage\ArrayDataStorage::class,
 			'arguments' => [],
+			'metadata' => [],
 		],
 		'manipulators' => [],
 		'actions' => [],

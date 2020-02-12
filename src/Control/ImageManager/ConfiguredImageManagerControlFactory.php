@@ -67,6 +67,10 @@ final class ConfiguredImageManagerControlFactory
 			$dataStorage->addManipulator($manipulator);
 		}
 
+		foreach ($config->get('storage.metadata') as $key => $metadata) {
+			$dataStorage->getMetadata()->set($key, $metadata);
+		}
+
 		$control = $this->imageManagerControlFactory->create($dataStorage);
 
 		foreach ($config->get('actions') as $action) {

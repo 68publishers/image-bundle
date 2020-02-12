@@ -9,6 +9,11 @@ use Doctrine;
 interface IDataStorage
 {
 	/**
+	 * @return \SixtyEightPublishers\ImageBundle\Storage\Metadata\Metadata
+	 */
+	public function getMetadata(): Metadata\Metadata;
+
+	/**
 	 * The parameter $manipulator is class that manipulates with Image eg. instance of IDeleteManipulator, ISaveManipulator, IRotationManipulator et..
 	 *
 	 * @param object $manipulator

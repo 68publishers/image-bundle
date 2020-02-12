@@ -11,7 +11,7 @@ use SixtyEightPublishers;
 final class ArrayDataStorage implements IDataStorage
 {
 	use Nette\SmartObject,
-		TManipulators;
+		TDataStorage;
 
 	/** @var \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage[]  */
 	protected $images = [];

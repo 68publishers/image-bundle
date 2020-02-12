@@ -21,7 +21,7 @@ abstract class AbstractImage implements IImage
 	 *
 	 * @var \Ramsey\Uuid\UuidInterface
 	 */
-	private $id;
+	protected $id;
 
 	/**
 	 * @ORM\Column(type="datetime")

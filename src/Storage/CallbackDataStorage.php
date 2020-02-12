@@ -10,7 +10,7 @@ use Doctrine;
 final class CallbackDataStorage implements IDataStorage
 {
 	use Nette\SmartObject,
-		TManipulators;
+		TDataStorage;
 
 	/** @var callable  */
 	protected $callback;

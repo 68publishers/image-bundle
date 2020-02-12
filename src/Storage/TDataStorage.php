@@ -6,12 +6,27 @@ namespace SixtyEightPublishers\ImageBundle\Storage;
 
 use SixtyEightPublishers;
 
-trait TManipulators
+trait TDataStorage
 {
+	/** @var \SixtyEightPublishers\ImageBundle\Storage\Metadata\Metadata|NULL */
+	private $metadata;
+
 	/** @var array  */
 	private $manipulators = [];
 
 	/*************** interface \SixtyEightPublishers\ImageBundle\Storage\IDataStorage ***************/
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getMetadata(): Metadata\Metadata
+	{
+		if (NULL === $this->metadata) {
+			$this->metadata = new Metadata\Metadata();
+		}
+
+		return $this->metadata;
+	}
 
 	/**
 	 * {@inheritdoc}

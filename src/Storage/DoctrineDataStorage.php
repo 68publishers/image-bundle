@@ -11,7 +11,7 @@ use SixtyEightPublishers;
 final class DoctrineDataStorage implements IDataStorage
 {
 	use Nette\SmartObject,
-		TManipulators;
+		TDataStorage;
 
 	/** @var \Doctrine\ORM\QueryBuilder  */
 	protected $qb;

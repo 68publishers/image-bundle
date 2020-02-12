@@ -11,7 +11,7 @@ use SixtyEightPublishers;
 final class ExternalAssociationDataStorage implements IDataStorage
 {
 	use Nette\SmartObject;
-	use TManipulators {
+	use TDataStorage {
 		addManipulator as private _addManipulator;
 	}
 

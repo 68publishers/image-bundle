@@ -42,6 +42,8 @@ final class ImageManagerConfigurationStatementFactory
 
 		$this->validateIfKeyExists($options, 'storage.arguments', 'list');
 
+		$this->validateIfKeyExists($options, 'storage.metadata', 'array');
+
 		$this->validateIfKeyExists($options, 'manipulators', 'array', function (array $manipulators, array &$options) use ($name) {
 			foreach ($manipulators as $key => $manipulator) {
 				if (!$this->extension->needRegister($manipulators)) {

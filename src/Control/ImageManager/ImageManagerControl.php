@@ -222,6 +222,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 
 		$this->template->setTranslator($this->getPrefixedTranslator());
 
+		$this->template->originalTemplateFile = __DIR__ . '/templates/imageManagerControl.latte';
 		$this->template->images = $this->getImages();
 		$this->template->maxAllowedImages = $this->maxAllowedImages;
 		$this->template->uniqueId = $this->getUniqueId();

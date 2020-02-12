@@ -77,7 +77,7 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 		$configurationStatementFactory = new ImageManagerConfigurationStatementFactory($this);
 
 		foreach ($config['image_managers'] as $name => $options) {
-			$configurableImageManagerControlFactory->addSetup('addDefinition', [
+			$configurableImageManagerControlFactory->addSetup('addConfiguration', [
 				'name' => (string) $name,
 				'configuration' => $configurationStatementFactory->create((string) $name, $options),
 			]);

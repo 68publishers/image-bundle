@@ -18,7 +18,7 @@ final class ConfiguredImageManagerControlFactory
 	private $dataStorageFactory;
 
 	/** @var \SixtyEightPublishers\ImageBundle\Control\ImageManager\Configuration[]  */
-	private $definitions = [];
+	private $configurations = [];
 
 	/**
 	 * @param \SixtyEightPublishers\ImageBundle\Control\ImageManager\IImageManagerControlFactory $imageManagerControlFactory
@@ -40,34 +40,33 @@ final class ConfiguredImageManagerControlFactory
 	 *
 	 * @return void
 	 */
-	public function addDefinition(string $name, Configuration $configuration): void
+	public function addConfiguration(string $name, Configuration $configuration): void
 	{
-		$this->definitions[$name] = $configuration;
+		$this->configurations[$name] = $configuration;
 	}
 
 	/**
-	 * @param string $name
-	 * @param mixed  ...$dataStorageArgs
+	 * @param \SixtyEightPublishers\ImageBundle\Control\ImageManager\ConfiguredImageManagerArgs $args
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl
 	 */
-	public function create(string $name, ...$dataStorageArgs): ImageManagerControl
+	public function create(ConfiguredImageManagerArgs $args): ImageManagerControl
 	{
-		if (!array_key_exists($name, $this->definitions)) {
+		if (!array_key_exists($args->getName(), $this->configurations)) {
 			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidArgumentException(sprintf(
 				'Missing definition for ImageManagerControl with name %s.',
-				$name
+				$args->getName()
 			));
 		}
 
-		$config = $this->definitions[$name];
-		$dataStorage = $this->dataStorageFactory->create($config->get('storage.class_name'), ...array_merge($config->get('storage.arguments'), $dataStorageArgs));
+		$config = $this->configurations[$args->getName()];
+		$dataStorage = $this->dataStorageFactory->create($config->get('storage.class_name'), ...array_merge($config->get('storage.arguments'), $args->getDataStorageArgs()));
 
 		foreach ($config->get('manipulators') as $manipulator) {
 			$dataStorage->addManipulator($manipulator);
 		}
 
-		foreach ($config->get('storage.metadata') as $key => $metadata) {
+		foreach (array_merge($config->get('storage.metadata'), $args->getMetadata()) as $key => $metadata) {
 			$dataStorage->getMetadata()->set($key, $metadata);
 		}
 
@@ -140,6 +139,17 @@ final class ConfiguredImageManagerControlFactory
 		});
 
 		return $control;
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed  ...$dataStorageArgs
+	 *
+	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ConfiguredImageManagerArgs
+	 */
+	public function args(string $name, ...$dataStorageArgs): ConfiguredImageManagerArgs
+	{
+		return new ConfiguredImageManagerArgs($name, ...$dataStorageArgs);
 	}
 
 	/**

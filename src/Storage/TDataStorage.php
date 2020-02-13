@@ -8,10 +8,10 @@ use SixtyEightPublishers;
 
 trait TDataStorage
 {
-	/** @var \SixtyEightPublishers\ImageBundle\Storage\Metadata\Metadata|NULL */
-	private $metadata;
+	/** @var \SixtyEightPublishers\ImageBundle\Storage\Options\Options|NULL */
+	private $options;
 
-	/** @var array  */
+	/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IManipulator[]  */
 	private $manipulators = [];
 
 	/*************** interface \SixtyEightPublishers\ImageBundle\Storage\IDataStorage ***************/
@@ -19,19 +19,19 @@ trait TDataStorage
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getMetadata(): Metadata\Metadata
+	public function getOptions(): Options\IOptions
 	{
-		if (NULL === $this->metadata) {
-			$this->metadata = new Metadata\Metadata();
+		if (NULL === $this->options) {
+			$this->options = new Options\Options();
 		}
 
-		return $this->metadata;
+		return $this->options;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function addManipulator($manipulator): void
+	public function addManipulator(Manipulator\IManipulator $manipulator): void
 	{
 		$this->manipulators[] = $manipulator;
 	}
@@ -53,7 +53,7 @@ trait TDataStorage
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getManipulator(string $className)
+	public function getManipulator(string $className): Manipulator\IManipulator
 	{
 		foreach ($this->manipulators as $manipulator) {
 			if ($manipulator instanceof $className) {
@@ -65,5 +65,17 @@ trait TDataStorage
 			'Manipulator %s is not defined in DataStorage.',
 			$className
 		));
+	}
+
+	/**
+	 * @param string $manipulatorClassName
+	 * @param mixed  ...$args
+	 *
+	 * @return mixed
+	 * @throws \SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException
+	 */
+	public function manipulate(string $manipulatorClassName, ...$args)
+	{
+		return $this->getManipulator($manipulatorClassName)->manipulate($this->getOptions(), ...$args);
 	}
 }

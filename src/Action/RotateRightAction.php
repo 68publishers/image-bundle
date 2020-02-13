@@ -21,16 +21,14 @@ final class RotateRightAction extends AbstractAction
 	 */
 	protected function getManipulatorClass(): string
 	{
-		return SixtyEightPublishers\ImageBundle\Storage\Manipulator\IRotationManipulator::class;
+		return SixtyEightPublishers\ImageBundle\Storage\Manipulator\Rotation\IRotationManipulator::class;
 	}
 
 	/**
 	 * {@inheritdoc}
-	 *
-	 * @param \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IRotationManipulator $manipulator
 	 */
-	protected function doRun($manipulator, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
+	public function run(SixtyEightPublishers\ImageBundle\Storage\IDataStorage $dataStorage, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
 	{
-		$manipulator->rotate($image, -90);
+		$dataStorage->manipulate($this->getManipulatorClass(), $image, -90);
 	}
 }

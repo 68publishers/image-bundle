@@ -66,8 +66,8 @@ final class ConfiguredImageManagerControlFactory
 			$dataStorage->addManipulator($manipulator);
 		}
 
-		foreach (array_merge($config->get('storage.metadata'), $args->getMetadata()) as $key => $metadata) {
-			$dataStorage->getMetadata()->set($key, $metadata);
+		foreach (array_merge($config->get('storage.options'), $args->getOptions()) as $key => $options) {
+			$dataStorage->getOptions()->set($key, $options);
 		}
 
 		$control = $this->imageManagerControlFactory->create($dataStorage);
@@ -91,10 +91,6 @@ final class ConfiguredImageManagerControlFactory
 
 		if (NULL !== $config->get('max_file_size')) {
 			$control->setMaxFileSize($config->get('max_file_size'));
-		}
-
-		if ($config->get('save_manipulator_options') instanceof SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions) {
-			$control->setSaveManipulatorOptions($config->get('save_manipulator_options'));
 		}
 
 		$control->setThumbnailOptions($config->get('thumbnail.preset'), $config->get('thumbnail.descriptor'));

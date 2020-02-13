@@ -50,7 +50,7 @@ final class ExternalAssociationDataStorage implements IDataStorage
 	/**
 	 * {@inheritdoc}
 	 */
-	public function addManipulator($manipulator): void
+	public function addManipulator(Manipulator\IManipulator $manipulator): void
 	{
 		if ($manipulator instanceof Manipulator\IExternalAssociationStorageAware) {
 			$manipulator->setExternalAssociationStorage($this->externalAssociationStorage);

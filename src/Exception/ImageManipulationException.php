@@ -8,18 +8,16 @@ final class ImageManipulationException extends \Exception implements IException
 {
 	/**
 	 * @param string          $manipulationType
-	 * @param string          $imageInfoPath
 	 * @param int             $code
 	 * @param \Throwable|NULL $previous
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException
 	 */
-	public static function error(string $manipulationType, string $imageInfoPath, int $code = 0, ?\Throwable $previous = NULL): self
+	public static function error(string $manipulationType, int $code = 0, ?\Throwable $previous = NULL): self
 	{
 		return new static(sprintf(
-			'Error during manipulation "%s" on image %s.',
-			$manipulationType,
-			$imageInfoPath
+			'Error during manipulation %s on image.',
+			$manipulationType
 		), $code, $previous);
 	}
 }

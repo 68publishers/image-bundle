@@ -54,14 +54,13 @@ final class RelativeDimensionsValidator implements IResourceValidator
 	}
 
 	/**
-	 * @param int                                          $width
-	 * @param int                                          $height
-	 * @param \SixtyEightPublishers\ImageStorage\ImageInfo $info
+	 * @param int $width
+	 * @param int $height
 	 *
 	 * @return void
 	 * @throws \SixtyEightPublishers\ImageBundle\Exception\TranslatableException
 	 */
-	private function validateGte(int $width, int $height, SixtyEightPublishers\ImageStorage\ImageInfo $info): void
+	private function validateGte(int $width, int $height): void
 	{
 		if ((NULL === $this->width ? TRUE : $width >= $this->width) && (NULL === $this->height ? TRUE : $height >= $this->height)) {
 			return;
@@ -69,23 +68,22 @@ final class RelativeDimensionsValidator implements IResourceValidator
 
 		switch ($this->mask) {
 			case '11':
-				throw $this->createException('relative_dimensions_validator.gte_both', $width, $height, $info);
+				throw $this->createException('relative_dimensions_validator.gte_both', $width, $height);
 			case '10':
-				throw $this->createException('relative_dimensions_validator.gte_width', $width, $height, $info);
+				throw $this->createException('relative_dimensions_validator.gte_width', $width, $height);
 			case '01':
-				throw $this->createException('relative_dimensions_validator.gte_height', $width, $height, $info);
+				throw $this->createException('relative_dimensions_validator.gte_height', $width, $height);
 		}
 	}
 
 	/**
-	 * @param int                                          $width
-	 * @param int                                          $height
-	 * @param \SixtyEightPublishers\ImageStorage\ImageInfo $info
+	 * @param int $width
+	 * @param int $height
 	 *
 	 * @return void
 	 * @throws \SixtyEightPublishers\ImageBundle\Exception\TranslatableException
 	 */
-	private function validateLte(int $width, int $height, SixtyEightPublishers\ImageStorage\ImageInfo $info): void
+	private function validateLte(int $width, int $height): void
 	{
 		if ((NULL === $this->width ? TRUE : $width <= $this->width) && (NULL === $this->height ? TRUE : $height <= $this->height)) {
 			return;
@@ -93,23 +91,22 @@ final class RelativeDimensionsValidator implements IResourceValidator
 
 		switch ($this->mask) {
 			case '11':
-				throw $this->createException('relative_dimensions_validator.lte_both', $width, $height, $info);
+				throw $this->createException('relative_dimensions_validator.lte_both', $width, $height);
 			case '10':
-				throw $this->createException('relative_dimensions_validator.lte_width', $width, $height, $info);
+				throw $this->createException('relative_dimensions_validator.lte_width', $width, $height);
 			case '01':
-				throw $this->createException('relative_dimensions_validator.lte_height', $width, $height, $info);
+				throw $this->createException('relative_dimensions_validator.lte_height', $width, $height);
 		}
 	}
 
 	/**
-	 * @param string                                       $message
-	 * @param int                                          $width
-	 * @param int                                          $height
-	 * @param \SixtyEightPublishers\ImageStorage\ImageInfo $info
+	 * @param string $message
+	 * @param int    $width
+	 * @param int    $height
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Exception\TranslatableException
 	 */
-	private function createException(string $message, int $width, int $height, SixtyEightPublishers\ImageStorage\ImageInfo $info): SixtyEightPublishers\ImageBundle\Exception\TranslatableException
+	private function createException(string $message, int $width, int $height): SixtyEightPublishers\ImageBundle\Exception\TranslatableException
 	{
 		$args = [
 			'width' => $width,
@@ -124,10 +121,7 @@ final class RelativeDimensionsValidator implements IResourceValidator
 			$args['required_height'] = $this->height;
 		}
 
-		$previous = SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error(
-			'validator - relative dimensions',
-			(string) $info
-		);
+		$previous = SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('validator - relative dimensions');
 
 		return new SixtyEightPublishers\ImageBundle\Exception\TranslatableException($message, $args, 0, $previous);
 	}
@@ -143,15 +137,14 @@ final class RelativeDimensionsValidator implements IResourceValidator
 
 		$width = $image->width();
 		$height = $image->height();
-		$info = $resource->getInfo();
 
 		switch ($this->mode) {
 			case self::MODE_GTE:
-				$this->validateGte($width, $height, $info);
+				$this->validateGte($width, $height);
 
 				break;
 			case self::MODE_LTE:
-				$this->validateLte($width, $height, $info);
+				$this->validateLte($width, $height);
 
 				break;
 		}

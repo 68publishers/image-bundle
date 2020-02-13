@@ -42,7 +42,7 @@ final class ImageManagerConfigurationStatementFactory
 
 		$this->validateIfKeyExists($options, 'storage.arguments', 'list');
 
-		$this->validateIfKeyExists($options, 'storage.metadata', 'array');
+		$this->validateIfKeyExists($options, 'storage.options', 'array');
 
 		$this->validateIfKeyExists($options, 'manipulators', 'array', function (array $manipulators, array &$options) use ($name) {
 			foreach ($manipulators as $key => $manipulator) {
@@ -83,10 +83,6 @@ final class ImageManagerConfigurationStatementFactory
 		});
 
 		$this->validateIfKeyExists($options, 'max_file_size', 'null|int|float|string');
-
-		$this->validateIfKeyExists($options, 'save_manipulator_options', 'null|string|' . Nette\DI\Statement::class, static function ($statement, array &$options) {
-			$options['save_manipulator_options'] = NULL !== $statement && !$statement instanceof Nette\DI\Statement ? new Nette\DI\Statement($statement) : $statement;
-		});
 
 		$this->validateIfKeyExists($options, 'event_subscribers', 'array', function (array $subscribers, array &$options) use ($name) {
 			foreach ($subscribers as $key => $subscriber) {

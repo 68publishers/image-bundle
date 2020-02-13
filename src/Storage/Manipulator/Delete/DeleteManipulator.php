@@ -2,17 +2,15 @@
 
 declare(strict_types=1);
 
-namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator;
+namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator\Delete;
 
-use Nette;
 use Doctrine;
 use SixtyEightPublishers;
 
-class DeleteManipulator implements IDeleteManipulator, IExternalAssociationStorageAware
+class DeleteManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulator\AbstractManipulator implements IDeleteManipulator, SixtyEightPublishers\ImageBundle\Storage\Manipulator\IExternalAssociationStorageAware
 {
-	use Nette\SmartObject,
-		TExtendableTransaction,
-		TAssociationStorageAware;
+	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExtendableTransaction,
+		SixtyEightPublishers\ImageBundle\Storage\Manipulator\TAssociationStorageAware;
 
 	/** @var \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory  */
 	private $transactionFactory;
@@ -25,25 +23,17 @@ class DeleteManipulator implements IDeleteManipulator, IExternalAssociationStora
 		$this->transactionFactory = $transactionFactory;
 	}
 
-	/********** interface \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator **********/
+	/********** interface \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDelete\DeleteManipulator **********/
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function delete(SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
+	public function __invoke(SixtyEightPublishers\ImageBundle\Storage\Options\IOptions $options, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
 	{
 		$transaction = $this->transactionFactory->create(static function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image) {
 			$em->remove($image);
 
 			return $image->getSource();
-		});
-
-		$transaction->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
-			throw $e;
-		});
-
-		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($image) {
-			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('delete', (string) $image->getSource(), 0, $e);
 		});
 
 		# External associations
@@ -63,7 +53,7 @@ class DeleteManipulator implements IDeleteManipulator, IExternalAssociationStora
 			});
 		}
 
-		$transaction = $transaction->immutable($image);
+		$transaction = $transaction->immutable($image, $options);
 
 		$this->extendTransaction($transaction);
 

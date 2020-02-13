@@ -21,16 +21,14 @@ final class DeleteAction extends AbstractAction
 	 */
 	protected function getManipulatorClass(): string
 	{
-		return SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator::class;
+		return SixtyEightPublishers\ImageBundle\Storage\Manipulator\Delete\IDeleteManipulator::class;
 	}
 
 	/**
 	 * {@inheritdoc}
-	 *
-	 * @param \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator $manipulator
 	 */
-	protected function doRun($manipulator, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
+	public function run(SixtyEightPublishers\ImageBundle\Storage\IDataStorage $dataStorage, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
 	{
-		$manipulator->delete($image);
+		$dataStorage->manipulate($this->getManipulatorClass(), $image);
 	}
 }

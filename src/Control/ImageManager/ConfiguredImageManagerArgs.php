@@ -17,7 +17,7 @@ final class ConfiguredImageManagerArgs
 	private $dataStorageArgs;
 
 	/** @var array  */
-	private $metadata = [];
+	private $options = [];
 
 	/**
 	 * @param string $name
@@ -30,13 +30,13 @@ final class ConfiguredImageManagerArgs
 	}
 
 	/**
-	 * @param array $metadata
+	 * @param array $options
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ConfiguredImageManagerArgs
 	 */
-	public function setMetadata(array $metadata): self
+	public function setOptions(array $options): self
 	{
-		$this->metadata = $metadata;
+		$this->options = $options;
 
 		return $this;
 	}
@@ -47,9 +47,9 @@ final class ConfiguredImageManagerArgs
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ConfiguredImageManagerArgs
 	 */
-	public function addMetadata(string $key, $value): self
+	public function addOption(string $key, $value): self
 	{
-		$this->metadata[$key] = $value;
+		$this->options[$key] = $value;
 
 		return $this;
 	}
@@ -73,8 +73,8 @@ final class ConfiguredImageManagerArgs
 	/**
 	 * @return array
 	 */
-	public function getMetadata(): array
+	public function getOptions(): array
 	{
-		return $this->metadata;
+		return $this->options;
 	}
 }

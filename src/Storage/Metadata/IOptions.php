@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace SixtyEightPublishers\ImageBundle\Storage\Metadata;
+namespace SixtyEightPublishers\ImageBundle\Storage\Options;
 
-interface IMetadata
+interface IOptions
 {
 	/**
 	 * @param string      $key

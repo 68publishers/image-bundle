@@ -2,18 +2,16 @@
 
 declare(strict_types=1);
 
-namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator;
+namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator\Save;
 
 use Nette;
 use Doctrine;
-use Intervention;
 use SixtyEightPublishers;
 
-class SaveManipulator implements ISaveManipulator, IExternalAssociationStorageAware
+class SaveManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulator\AbstractManipulator implements ISaveManipulator, SixtyEightPublishers\ImageBundle\Storage\Manipulator\IExternalAssociationStorageAware
 {
-	use Nette\SmartObject,
-		TExtendableTransaction,
-		TAssociationStorageAware;
+	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExtendableTransaction,
+		SixtyEightPublishers\ImageBundle\Storage\Manipulator\TAssociationStorageAware;
 
 	/** @var \SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory  */
 	private $imageEntityFactory;
@@ -58,62 +56,45 @@ class SaveManipulator implements ISaveManipulator, IExternalAssociationStorageAw
 	 *
 	 * @throws \Exception
 	 */
-	public function createResource(Nette\Http\FileUpload $fileUpload, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageStorage\Resource\IResource
+	public function createResource(Nette\Http\FileUpload $fileUpload, SixtyEightPublishers\ImageBundle\Storage\Options\IOptions $options): SixtyEightPublishers\ImageStorage\Resource\IResource
 	{
+		$helper = new Options($options);
 		$storage = $this->imageStorageProvider->get($this->imageStorageName);
-		$path = sprintf('%s/%s', $options->createNamespace($fileUpload), $options->createSourceName($fileUpload));
+		$path = sprintf('%s/%s', $helper->getNamespace(), $helper->getSourceName($fileUpload));
 
-		try {
-			$resource = $storage->createResourceFromLocalFile(
-				new SixtyEightPublishers\ImageStorage\ImageInfo($path),
-				$fileUpload->getTemporaryFile()
-			);
+		$resource = $storage->createResourceFromLocalFile(
+			new SixtyEightPublishers\ImageStorage\ImageInfo($path),
+			$fileUpload->getTemporaryFile()
+		);
 
-			$resource->modifyImage([
-				'o' => 'auto',
-				'pf' => '1',
-			]);
+		$resource->modifyImage([
+			'o' => 'auto',
+			'pf' => '1',
+		]);
 
-			return  $resource;
-		} catch (SixtyEightPublishers\ImageStorage\Exception\ImageInfoException $e) {
-		} catch (Intervention\Image\Exception\ImageException $e) {
-		} catch (SixtyEightPublishers\ImageStorage\Exception\IException $e) {
-		}
-
-		throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - resource creating', $path, 0, $e ?? NULL);
+		return  $resource;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function save(SixtyEightPublishers\ImageStorage\Resource\IResource $resource, Options\SaveManipulatorOptions $options): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
+	public function __invoke(SixtyEightPublishers\ImageBundle\Storage\Options\IOptions $options, SixtyEightPublishers\ImageStorage\Resource\IResource $resource): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{
+		$helper = new Options($options);
 		$storage = $this->imageStorageProvider->get($this->imageStorageName);
-		$metadata = array_merge($this->resourceMetadataFactory->create($resource), $options->getCustomMetadata());
+		$resourceMetadata = array_merge($this->resourceMetadataFactory->create($resource), $helper->getCustomMetadata());
 
-		try {
-			$storage->save($resource);
-		} catch (SixtyEightPublishers\ImageStorage\Exception\FilesystemException $e) {
-			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - resource saving', (string) $resource->getInfo(), 0, $e);
-		}
+		$storage->save($resource);
 
-		$transaction = $this->transactionFactory->create(function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageStorage\ImageInfo $imageInfo) use ($metadata) {
+		$transaction = $this->transactionFactory->create(function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageStorage\ImageInfo $imageInfo) use ($resourceMetadata) {
 			$image = $this->imageEntityFactory->create(
 				SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfoFactory::create($imageInfo, $this->imageStorageName)
 			);
 
-			$image->setMetadata($metadata);
+			$image->setMetadata($resourceMetadata);
 			$em->persist($image);
 
 			return $image;
-		});
-
-		$transaction->catch(SixtyEightPublishers\ImageBundle\Exception\IException::class, static function (SixtyEightPublishers\ImageBundle\Exception\IException $e) {
-			throw $e;
-		});
-
-		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) use ($resource) {
-			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('save - doctrine persistence', (string) $resource->getInfo(), 0, $e);
 		});
 
 		# External associations
@@ -126,10 +107,10 @@ class SaveManipulator implements ISaveManipulator, IExternalAssociationStorageAw
 			});
 		}
 
-		$transaction = $transaction->immutable($resource->getInfo());
+		$transaction = $transaction->immutable($resource->getInfo(), $options);
 
 		$this->extendTransaction($transaction);
-		$options->doExtendTransaction($transaction);
+		$helper->extendTransaction($transaction);
 
 		return $transaction->run();
 	}

@@ -51,9 +51,6 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	/** @var \Doctrine\Common\Collections\Collection|\SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage[]|NULL */
 	private $images;
 
-	/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions|NULL */
-	private $saveManipulatorOptions;
-
 	/** @var string|NULL */
 	private $thumbnailPreset;
 
@@ -129,10 +126,8 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		}
 
 		try {
-			/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator $manipulator */
-			$manipulator = $this->storage->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator::class);
-
-			$manipulator->sort(
+			$this->storage->manipulate(
+				SixtyEightPublishers\ImageBundle\Storage\Manipulator\Sortable\ISortableManipulator::class,
 				$this->findImage($sortedId),
 				NULL !== $previousId ? $this->findImage($previousId) : NULL,
 				NULL !== $nextId ? $this->findImage($nextId) : NULL
@@ -147,18 +142,6 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 
 			return;
 		}
-	}
-
-	/**
-	 * @param \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions $saveManipulatorOptions
-	 *
-	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ImageManagerControl
-	 */
-	public function setSaveManipulatorOptions(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions $saveManipulatorOptions): self
-	{
-		$this->saveManipulatorOptions = $saveManipulatorOptions;
-
-		return $this;
 	}
 
 	/**
@@ -226,13 +209,13 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		$this->template->images = $this->getImages();
 		$this->template->maxAllowedImages = $this->maxAllowedImages;
 		$this->template->uniqueId = $this->getUniqueId();
-		$this->template->isSaveable = $this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator::class);
+		$this->template->isSaveable = $this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Save\ISaveManipulator::class);
 		$this->template->actions = $this->actions;
 		$this->template->allowUpload = $allowUpload = (NULL === $maxFiles || $maxFiles > 0);
 		$this->template->denyUpload = !$allowUpload;
 		$this->template->thumbnailPreset = $this->thumbnailPreset;
 		$this->template->thumbnailDescriptor = $this->thumbnailDescriptor;
-		$this->template->sortable = $sortable = $this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISortableManipulator::class);
+		$this->template->sortable = $sortable = $this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Sortable\ISortableManipulator::class);
 
 		if (TRUE === $sortable) {
 			$this->template->sortableRequest = Nette\Utils\Json::encode([
@@ -271,7 +254,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	{
 		if (TRUE === $delete) {
 			# check manipulator only
-			$this->getStorage()->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator::class);
+			$this->getStorage()->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Delete\IDeleteManipulator::class);
 		}
 
 		if (!in_array($direction, self::DIRECTIONS, TRUE)) {
@@ -329,10 +312,10 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	 */
 	protected function createComponentDropZone(): SixtyEightPublishers\ImageBundle\Control\DropZone\DropZoneControl
 	{
-		if (!$this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator::class)) {
+		if (!$this->storage->hasManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Save\ISaveManipulator::class)) {
 			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException(sprintf(
 				'DataStorage must contains manipulator with type %s if you want to use DropZone.',
-				SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator::class
+				SixtyEightPublishers\ImageBundle\Storage\Manipulator\Save\ISaveManipulator::class
 			));
 		}
 
@@ -412,17 +395,16 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 	 */
 	private function doImageUpload(Nette\Http\FileUpload $fileUpload): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{
-		/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator $manipulator */
-		$manipulator = $this->storage->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\ISaveManipulator::class);
-		$options = $this->saveManipulatorOptions ?? new SixtyEightPublishers\ImageBundle\Storage\Manipulator\Options\SaveManipulatorOptions();
+		/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\Save\ISaveManipulator $manipulator */
+		$manipulator = $this->storage->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Save\ISaveManipulator::class);
 
-		$resource = $manipulator->createResource($fileUpload, $options);
+		$resource = $manipulator->createResource($fileUpload, $this->storage->getOptions());
 
 		foreach ($this->resourceValidators as $resourceValidator) {
 			$resourceValidator->validate($resource);
 		}
 
-		return $manipulator->save($resource, $options);
+		return $manipulator->manipulate($this->storage->getOptions(), $resource);
 	}
 
 	/**
@@ -444,10 +426,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		}
 
 		$transaction = $this->transactionFactory->create(function ($_, Nette\Http\FileUpload $fileUpload, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $imageForDelete) {
-			/** @var \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator $deleteManipulator */
-			$deleteManipulator = $this->getStorage()->getManipulator(SixtyEightPublishers\ImageBundle\Storage\Manipulator\IDeleteManipulator::class);
-
-			$deleteManipulator->delete($imageForDelete);
+			$this->getStorage()->manipulate(SixtyEightPublishers\ImageBundle\Storage\Manipulator\Delete\IDeleteManipulator::class, $imageForDelete);
 
 			return $this->doImageUpload($fileUpload);
 		});
@@ -457,7 +436,7 @@ final class ImageManagerControl extends SixtyEightPublishers\SmartNetteComponent
 		});
 
 		$transaction->error(static function (SixtyEightPublishers\DoctrinePersistence\Exception\PersistenceException $e) {
-			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('upload new and delete existing', '?', 0, $e);
+			throw SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('upload new and delete existing', 0, $e);
 		});
 
 		return $transaction->run($fileUpload, $imageForDelete);

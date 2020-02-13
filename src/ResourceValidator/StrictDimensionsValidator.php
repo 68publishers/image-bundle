@@ -55,10 +55,7 @@ final class StrictDimensionsValidator implements IResourceValidator
 			'strict_dimensions_validator',
 			$args,
 			0,
-			SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error(
-				'validation - strict dimensions',
-				(string) $resource->getInfo()
-			)
+			SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException::error('validation - strict dimensions')
 		);
 	}
 }

@@ -7,10 +7,6 @@ namespace SixtyEightPublishers\ImageBundle\Action;
 use Nette;
 use SixtyEightPublishers;
 
-/**
- * @method void onSuccess()
- * @method void onError(\Throwable $e)
- */
 abstract class AbstractAction implements IAction
 {
 	use Nette\SmartObject;
@@ -31,15 +27,6 @@ abstract class AbstractAction implements IAction
 	 */
 	abstract protected function getManipulatorClass(): string;
 
-	/**
-	 * @param object                                                  $manipulator
-	 * @param \SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image
-	 *
-	 * @return void
-	 * @throws \SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException
-	 */
-	abstract protected function doRun($manipulator, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void;
-
 	/*************** interface \AppBundle\Control\ImageManager\Action\AbstractAction ***************/
 
 	/**
@@ -58,13 +45,5 @@ abstract class AbstractAction implements IAction
 		$manipulatorClass = $this->getManipulatorClass();
 
 		return $dataStorage->hasManipulator($manipulatorClass);
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function run(SixtyEightPublishers\ImageBundle\Storage\IDataStorage $dataStorage, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image): void
-	{
-		$this->doRun($dataStorage->getManipulator($this->getManipulatorClass()), $image);
 	}
 }

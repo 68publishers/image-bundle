@@ -9,18 +9,16 @@ use Doctrine;
 interface IDataStorage
 {
 	/**
-	 * @return \SixtyEightPublishers\ImageBundle\Storage\Metadata\Metadata
+	 * @return \SixtyEightPublishers\ImageBundle\Storage\Options\IOptions
 	 */
-	public function getMetadata(): Metadata\Metadata;
+	public function getOptions(): Options\IOptions;
 
 	/**
-	 * The parameter $manipulator is class that manipulates with Image eg. instance of IDeleteManipulator, ISaveManipulator, IRotationManipulator et..
-	 *
-	 * @param object $manipulator
+	 * @param \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IManipulator $manipulator
 	 *
 	 * @return void
 	 */
-	public function addManipulator($manipulator): void;
+	public function addManipulator(Manipulator\IManipulator $manipulator): void;
 
 	/**
 	 * @param string $className
@@ -32,10 +30,19 @@ interface IDataStorage
 	/**
 	 * @param string $className
 	 *
-	 * @return object
+	 * @return \SixtyEightPublishers\ImageBundle\Storage\Manipulator\IManipulator
 	 * @throws \SixtyEightPublishers\ImageBundle\Exception\InvalidArgumentException
 	 */
-	public function getManipulator(string $className);
+	public function getManipulator(string $className): Manipulator\IManipulator;
+
+	/**
+	 * @param string $manipulatorClassName
+	 * @param mixed  ...$args
+	 *
+	 * @return mixed
+	 * @throws \SixtyEightPublishers\ImageBundle\Exception\ImageManipulationException
+	 */
+	public function manipulate(string $manipulatorClassName, ...$args);
 
 	/**
 	 * @return \Doctrine\Common\Collections\Collection|\SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage[]

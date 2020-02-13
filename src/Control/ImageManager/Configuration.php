@@ -15,7 +15,7 @@ final class Configuration
 		'storage' => [
 			'class_name' => SixtyEightPublishers\ImageBundle\Storage\ArrayDataStorage::class,
 			'arguments' => [],
-			'metadata' => [],
+			'options' => [],
 		],
 		'manipulators' => [],
 		'actions' => [],
@@ -26,7 +26,6 @@ final class Configuration
 			'direction' => ImageManagerControl::DIRECTION_TOP,
 		],
 		'max_file_size' => NULL,
-		'save_manipulator_options' => NULL,
 		'event_subscribers' => [],
 		'thumbnail' => [
 			'preset' => NULL,

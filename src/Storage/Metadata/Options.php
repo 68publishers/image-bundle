@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace SixtyEightPublishers\ImageBundle\Storage\Metadata;
+namespace SixtyEightPublishers\ImageBundle\Storage\Options;
 
 use Nette;
 use SixtyEightPublishers;
 
-final class Metadata implements IMetadata
+final class Options implements IOptions
 {
 	use Nette\SmartObject;
 
 	/** @var array  */
-	private $metadata = [];
+	private $options = [];
 
-	/************** interface \SixtyEightPublishers\ImageBundle\Storage\Metadata\IMetadata **************/
+	/************** interface \SixtyEightPublishers\ImageBundle\Storage\Options\IOptions **************/
 
 	/**
 	 * {@inheritDoc}
@@ -23,20 +23,20 @@ final class Metadata implements IMetadata
 	{
 		if (!$this->has($key)) {
 			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException(sprintf(
-				'Data for key "%s" not found.',
+				'Value for key "%s" not found.',
 				$key
 			));
 		}
 
-		if (NULL !== $validator && !Nette\Utils\Validators::is($this->metadata[$key], $validator)) {
+		if (NULL !== $validator && !Nette\Utils\Validators::is($this->options[$key], $validator)) {
 			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidStateException(sprintf(
-				'Metadata for key "%s" doesn\'t match validator %s.',
+				'Value for key "%s" doesn\'t match validator %s.',
 				$key,
 				$validator
 			));
 		}
 
-		return $this->metadata[$key];
+		return $this->options[$key];
 	}
 
 	/**
@@ -44,11 +44,11 @@ final class Metadata implements IMetadata
 	 */
 	public function has(string $key, ?string $validator = NULL): bool
 	{
-		if (!array_key_exists($key, $this->metadata)) {
+		if (!array_key_exists($key, $this->options)) {
 			return FALSE;
 		}
 
-		return NULL === $validator ? TRUE : Nette\Utils\Validators::is($this->metadata[$key], $validator);
+		return NULL === $validator ? TRUE : Nette\Utils\Validators::is($this->options[$key], $validator);
 	}
 
 	/**
@@ -56,6 +56,6 @@ final class Metadata implements IMetadata
 	 */
 	public function set(string $key, $value): void
 	{
-		$this->metadata[$key] = $value;
+		$this->options[$key] = $value;
 	}
 }

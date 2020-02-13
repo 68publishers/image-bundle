@@ -168,6 +168,7 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 	 *
 	 * @return void
 	 * @throws \Nette\Utils\AssertionException
+	 * @throws \ReflectionException
 	 */
 	private function registerImageEntityFactory(Nette\DI\ContainerBuilder $builder, array $config): void
 	{
@@ -175,32 +176,57 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 
 		$imageEntity = $this->getImageEntityDefinition()['entity'];
 		$imageEntityFactory = $config['image_entity_factory'];
+		$imageEntityFactoryParameters = [];
 
 		if (NULL === $imageEntityFactory) {
-			switch ($imageEntity) {
-				case SixtyEightPublishers\ImageBundle\DoctrineEntity\Basic\Image::class:
-					$imageEntityFactory = SixtyEightPublishers\ImageBundle\EntityFactory\DefaultImageEntityFactory::class;
-
-					break;
-				case SixtyEightPublishers\ImageBundle\DoctrineEntity\SoftDeletable\Image::class:
-					$imageEntityFactory = SixtyEightPublishers\ImageBundle\EntityFactory\SoftDeletableImageEntityFactory::class;
-
-					break;
-				default:
-					throw new Nette\Utils\AssertionException(sprintf(
-						'You have custom Image entity %s, please provide your own implementation of %s via option %s.image_entity_factory',
-						$imageEntity,
-						SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory::class,
-						$this->name
-					));
+			if (!$this->canDefaultImageEntityFactoryBeUsed($imageEntity)) {
+				throw new Nette\Utils\AssertionException(sprintf(
+					'You have custom Image entity %s, please provide your own implementation of %s via option %s.image_entity_factory',
+					$imageEntity,
+					SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory::class,
+					$this->name
+				));
 			}
+
+			$imageEntityFactory = SixtyEightPublishers\ImageBundle\EntityFactory\DefaultImageEntityFactory::class;
+			$imageEntityFactoryParameters['className'] = $imageEntity;
 		}
 
 		if ($this->needRegister($imageEntityFactory)) {
 			$builder->addDefinition($this->prefix('image_entity_factory'))
 				->setType(SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory::class)
-				->setFactory($imageEntityFactory);
+				->setFactory($imageEntityFactory, $imageEntityFactoryParameters);
 		}
+	}
+
+	/**
+	 * @param string $imageEntity
+	 *
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	private function canDefaultImageEntityFactoryBeUsed(string $imageEntity): bool
+	{
+		$reflectionClass = new \ReflectionClass($imageEntity);
+		$constructorParameters = $reflectionClass->getConstructor()->getParameters();
+
+		if (1 > count($constructorParameters)) {
+			return TRUE;
+		}
+
+		$firstParameterClass = array_shift($constructorParameters)->getClass();
+
+		if (NULL === $firstParameterClass || SixtyEightPublishers\ImageStorage\DoctrineType\ImageInfo\ImageInfo::class !== $firstParameterClass->getName()) {
+			return FALSE;
+		}
+
+		foreach ($constructorParameters as $constructorParameter) {
+			if (!$constructorParameter->isOptional()) {
+				return FALSE;
+			}
+		}
+
+		return TRUE;
 	}
 
 	/**

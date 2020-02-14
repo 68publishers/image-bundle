@@ -8,7 +8,7 @@ use SixtyEightPublishers;
 
 class FlaggableManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulator\AbstractManipulator implements IFlaggableManipulator, SixtyEightPublishers\ImageBundle\Storage\Manipulator\IExternalAssociationStorageAware
 {
-	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TAssociationStorageAware;
+	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExternalAssociationStorageAware;
 
 	/** @var callable[]  */
 	private $handlers = [];

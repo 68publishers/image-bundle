@@ -11,7 +11,7 @@ use SixtyEightPublishers;
 class SaveManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulator\AbstractManipulator implements ISaveManipulator, SixtyEightPublishers\ImageBundle\Storage\Manipulator\IExternalAssociationStorageAware
 {
 	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExtendableTransaction,
-		SixtyEightPublishers\ImageBundle\Storage\Manipulator\TAssociationStorageAware;
+		SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExternalAssociationStorageAware;
 
 	/** @var \SixtyEightPublishers\ImageBundle\EntityFactory\IImageEntityFactory  */
 	private $imageEntityFactory;

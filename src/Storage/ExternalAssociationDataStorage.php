@@ -15,11 +15,11 @@ final class ExternalAssociationDataStorage implements IDataStorage
 		addManipulator as private _addManipulator;
 	}
 
-	/** @var \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage  */
-	private $externalAssociationStorage;
-
 	/** @var \Doctrine\ORM\EntityManagerInterface  */
 	private $em;
+
+	/** @var \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage  */
+	private $externalAssociationStorage;
 
 	/** @var string  */
 	private $entityClassName;
@@ -32,17 +32,25 @@ final class ExternalAssociationDataStorage implements IDataStorage
 	 */
 	public function __construct(
 		Doctrine\ORM\EntityManagerInterface $em,
-		SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage $externalAssociationStorage,
+		ExternalAssociation\IExternalAssociationStorage $externalAssociationStorage,
 		?string $namespace = NULL,
 		string $entityClassName = SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage::class
 	) {
-		$this->externalAssociationStorage = $externalAssociationStorage;
 		$this->em = $em;
+		$this->externalAssociationStorage = $externalAssociationStorage;
 		$this->entityClassName = $entityClassName;
 
 		if (NULL !== $namespace) {
 			$externalAssociationStorage->setNamespace($namespace);
 		}
+	}
+
+	/**
+	 * @return \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage
+	 */
+	public function getExternalAssociationStorage(): ExternalAssociation\IExternalAssociationStorage
+	{
+		return $this->externalAssociationStorage;
 	}
 
 	/*************** interface \SixtyEightPublishers\ImageBundle\Storage\IDataStorage ***************/

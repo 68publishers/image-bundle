@@ -52,25 +52,8 @@ final class ConfiguredImageManagerControlFactory
 	 */
 	public function create(ConfiguredImageManagerArgs $args): ImageManagerControl
 	{
-		if (!array_key_exists($args->getName(), $this->configurations)) {
-			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidArgumentException(sprintf(
-				'Missing definition for ImageManagerControl with name %s.',
-				$args->getName()
-			));
-		}
-
-		$config = $this->configurations[$args->getName()];
-		$dataStorage = $this->dataStorageFactory->create($config->get('storage.class_name'), ...array_merge($config->get('storage.arguments'), $args->getDataStorageArgs()));
-
-		foreach ($config->get('manipulators') as $manipulator) {
-			$dataStorage->addManipulator($manipulator);
-		}
-
-		foreach (array_merge($config->get('storage.options'), $args->getOptions()) as $key => $options) {
-			$dataStorage->getOptions()->set($key, $options);
-		}
-
-		$control = $this->imageManagerControlFactory->create($dataStorage);
+		$config = $this->getConfig($args->getName());
+		$control = $this->imageManagerControlFactory->create($this->createDataStorage($args));
 
 		foreach ($config->get('actions') as $action) {
 			$control->addAction($action);
@@ -143,9 +126,30 @@ final class ConfiguredImageManagerControlFactory
 	 *
 	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\ConfiguredImageManagerArgs
 	 */
-	public function args(string $name, ...$dataStorageArgs): ConfiguredImageManagerArgs
+	public function createArgs(string $name, ...$dataStorageArgs): ConfiguredImageManagerArgs
 	{
 		return new ConfiguredImageManagerArgs($name, ...$dataStorageArgs);
+	}
+
+	/**
+	 * @param \SixtyEightPublishers\ImageBundle\Control\ImageManager\ConfiguredImageManagerArgs $args
+	 *
+	 * @return \SixtyEightPublishers\ImageBundle\Storage\IDataStorage
+	 */
+	public function createDataStorage(ConfiguredImageManagerArgs $args): SixtyEightPublishers\ImageBundle\Storage\IDataStorage
+	{
+		$config = $this->getConfig($args->getName());
+		$dataStorage = $this->dataStorageFactory->create($config->get('storage.class_name'), ...array_merge($config->get('storage.arguments'), $args->getDataStorageArgs()));
+
+		foreach ($config->get('manipulators') as $manipulator) {
+			$dataStorage->addManipulator($manipulator);
+		}
+
+		foreach (array_merge($config->get('storage.options'), $args->getOptions()) as $key => $options) {
+			$dataStorage->getOptions()->set($key, $options);
+		}
+
+		return $dataStorage;
 	}
 
 	/**
@@ -161,5 +165,23 @@ final class ConfiguredImageManagerControlFactory
 		} else {
 			$control->setFile($file);
 		}
+	}
+
+	/**
+	 * @param string $name
+	 *
+	 * @return \SixtyEightPublishers\ImageBundle\Control\ImageManager\Configuration
+	 * @throws \SixtyEightPublishers\ImageBundle\Exception\InvalidArgumentException
+	 */
+	private function getConfig(string $name): Configuration
+	{
+		if (!array_key_exists($name, $this->configurations)) {
+			throw new SixtyEightPublishers\ImageBundle\Exception\InvalidArgumentException(sprintf(
+				'Missing definition for ImageManagerControl with name %s.',
+				$name
+			));
+		}
+
+		return $this->configurations[$name];
 	}
 }

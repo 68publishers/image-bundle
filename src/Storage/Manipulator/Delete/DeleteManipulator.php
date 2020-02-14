@@ -10,7 +10,7 @@ use SixtyEightPublishers;
 class DeleteManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulator\AbstractManipulator implements IDeleteManipulator, SixtyEightPublishers\ImageBundle\Storage\Manipulator\IExternalAssociationStorageAware
 {
 	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExtendableTransaction,
-		SixtyEightPublishers\ImageBundle\Storage\Manipulator\TAssociationStorageAware;
+		SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExternalAssociationStorageAware;
 
 	/** @var \SixtyEightPublishers\DoctrinePersistence\Transaction\ITransactionFactory  */
 	private $transactionFactory;

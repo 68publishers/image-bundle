@@ -6,7 +6,7 @@ namespace SixtyEightPublishers\ImageBundle\Storage\Manipulator;
 
 use SixtyEightPublishers;
 
-trait TAssociationStorageAware
+trait TExternalAssociationStorageAware
 {
 	/** @var \SixtyEightPublishers\ImageBundle\Storage\ExternalAssociation\IExternalAssociationStorage|NULL */
 	private $associationStorage;

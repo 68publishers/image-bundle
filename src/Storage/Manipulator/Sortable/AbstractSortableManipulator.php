@@ -8,7 +8,7 @@ use SixtyEightPublishers;
 
 abstract class AbstractSortableManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulator\AbstractManipulator implements ISortableManipulator, SixtyEightPublishers\ImageBundle\Storage\Manipulator\IExternalAssociationStorageAware
 {
-	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TAssociationStorageAware;
+	use SixtyEightPublishers\ImageBundle\Storage\Manipulator\TExternalAssociationStorageAware;
 
 	/**
 	 * Return TRUE if everything is OK otherwise return FALSE or better throw an exception.

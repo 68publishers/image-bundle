@@ -33,6 +33,8 @@ class RotationManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manip
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @throws \SixtyEightPublishers\ImageStorage\Exception\FilesystemException
 	 */
 	public function __invoke(SixtyEightPublishers\ImageBundle\Storage\Options\IOptions $options, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image, int $degrees): void
 	{
@@ -45,7 +47,7 @@ class RotationManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manip
 			'pf' => '1',
 		]);
 
-		$imageStorage->updateOriginal($resource);
+		$imageStorage->update($resource);
 
 		$transaction = $this->transactionFactory->create(static function (Doctrine\ORM\EntityManagerInterface $em, SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage $image) {
 			$image->update();

@@ -39,7 +39,7 @@
 							{if NULL !== $thumbnailDescriptor}
 								<img class="img-fluid img-thumbnail" n:srcset="$image->getSource(), $thumbnailDescriptor, $thumbnailPreset" alt="">
 							{else}
-								<img class="img-fluid img-thumbnail" n:img="$image->getSource(), $thumbnailPreset" alt="">
+								<img class="img-fluid img-thumbnail" n:img="$image->getSource(), $thumbnailPreset ?? [original => TRUE]" alt="">
 							{/if}
 						{/block}
 					</div>

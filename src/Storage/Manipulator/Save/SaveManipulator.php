@@ -77,6 +77,8 @@ class SaveManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulat
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @throws \SixtyEightPublishers\ImageStorage\Exception\FilesystemException
 	 */
 	public function __invoke(SixtyEightPublishers\ImageBundle\Storage\Options\IOptions $options, SixtyEightPublishers\ImageStorage\Resource\IResource $resource): SixtyEightPublishers\ImageBundle\DoctrineEntity\IImage
 	{

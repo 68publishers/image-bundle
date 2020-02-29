@@ -45,6 +45,7 @@ final class ImageBundleExtension extends Nette\DI\CompilerExtension implements
 	 * {@inheritdoc}
 	 *
 	 * @throws \Nette\Utils\AssertionException
+	 * @throws \ReflectionException
 	 */
 	public function loadConfiguration(): void
 	{

@@ -44,7 +44,6 @@ class RotationManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manip
 
 		$resource->modifyImage([
 			'o' => (string) $degrees,
-			'pf' => '1',
 		]);
 
 		$imageStorage->update($resource);

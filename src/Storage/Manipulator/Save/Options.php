@@ -50,7 +50,13 @@ final class Options
 			return (string) $cb($fileUpload);
 		}
 
-		return Ramsey\Uuid\Uuid::uuid4()->toString() . '.' . Nette\Utils\Strings::lower(pathinfo($fileUpload->getName(), PATHINFO_EXTENSION));
+		$extension = Nette\Utils\Strings::lower(pathinfo($fileUpload->getName(), PATHINFO_EXTENSION));
+
+		if (empty($extension) || !SixtyEightPublishers\ImageStorage\Helper\SupportedType::isExtensionSupported($extension)) {
+			$extension = SixtyEightPublishers\ImageStorage\Helper\SupportedType::getDefaultExtension();
+		}
+
+		return Ramsey\Uuid\Uuid::uuid4()->toString() . '.' . $extension;
 	}
 
 	/**

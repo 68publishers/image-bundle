@@ -69,7 +69,6 @@ class SaveManipulator extends SixtyEightPublishers\ImageBundle\Storage\Manipulat
 
 		$resource->modifyImage([
 			'o' => 'auto',
-			'pf' => '1',
 		]);
 
 		return  $resource;

@@ -18,7 +18,7 @@
 		"ramsey/uuid": "^3.8",
 		"68publishers/smart-nette-component": "^0.1",
 		"68publishers/doctrine-persistence": "^0.1",
-		"68publishers/image-storage": "^0.3",
+		"68publishers/image-storage": "^0.4",
 		"symfony/event-dispatcher": "^4.0",
 		"kdyby/doctrine": "^3.0",
 		"kdyby/translation": "^2.4"

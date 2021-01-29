@@ -1,3 +1,5 @@
+:no_entry: [DEPRECATED] The package has been moved to [68publishers/file-bundle](https://github.com/68publishers/file-bundle).
+
 # Image Bundle
 
 :city_sunset: Simple image management based on our [image-storage](https://github.com/68publishers/image-storage) for Nette Framework.
